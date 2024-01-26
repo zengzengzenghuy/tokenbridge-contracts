@@ -39,7 +39,7 @@ const DEPLOYMENT_ACCOUNT_ADDRESS = privateKeyToAddress(DEPLOYMENT_ACCOUNT_PRIVAT
 
 const foreignToHomeDecimalShift = FOREIGN_TO_HOME_DECIMAL_SHIFT || 0
 
-async function initializeBridge({ validatorsBridge, bridge, nonce, homeBridgeAddress }) {
+async function initializeBridge({ validatorsBridge, bridge, nonce, homeBridgeAddress, chainId }) {
   console.log(`Foreign Validators: ${validatorsBridge.options.address},
   ERC20_TOKEN_ADDRESS: ${ERC20_TOKEN_ADDRESS},
   FOREIGN_DAILY_LIMIT: ${FOREIGN_DAILY_LIMIT} which is ${Web3Utils.fromWei(FOREIGN_DAILY_LIMIT)} in eth,
@@ -74,7 +74,8 @@ async function initializeBridge({ validatorsBridge, bridge, nonce, homeBridgeAdd
     nonce,
     to: bridge.options.address,
     privateKey: deploymentPrivateKey,
-    url: FOREIGN_RPC_URL
+    url: FOREIGN_RPC_URL,
+    chainId
   })
   if (txInitializeBridge.status) {
     assert.strictEqual(Web3Utils.hexToNumber(txInitializeBridge.status), 1, 'Transaction Failed')
@@ -88,6 +89,8 @@ async function deployForeign(homeBridgeAddress) {
     throw new Error('ERC20_TOKEN_ADDRESS env var is not defined')
   }
   let nonce = await web3Foreign.eth.getTransactionCount(DEPLOYMENT_ACCOUNT_ADDRESS)
+  const foreignChainId = await web3Foreign.eth.getChainId()
+
   console.log('========================================')
   console.log('deploying ForeignBridge')
   console.log('========================================\n')
@@ -96,7 +99,8 @@ async function deployForeign(homeBridgeAddress) {
   const storageValidatorsForeign = await deployContract(EternalStorageProxy, [], {
     from: DEPLOYMENT_ACCOUNT_ADDRESS,
     network: 'foreign',
-    nonce
+    nonce,
+    chainId: Web3Utils.toHex(foreignChainId)
   })
   nonce++
   console.log('[Foreign] BridgeValidators Storage: ', storageValidatorsForeign.options.address)
@@ -105,7 +109,8 @@ async function deployForeign(homeBridgeAddress) {
   const bridgeValidatorsForeign = await deployContract(BridgeValidators, [], {
     from: DEPLOYMENT_ACCOUNT_ADDRESS,
     network: 'foreign',
-    nonce
+    nonce,
+    chainId: Web3Utils.toHex(foreignChainId)
   })
   nonce++
   console.log('[Foreign] BridgeValidators Implementation: ', bridgeValidatorsForeign.options.address)
@@ -116,7 +121,8 @@ async function deployForeign(homeBridgeAddress) {
     implementationAddress: bridgeValidatorsForeign.options.address,
     version: '1',
     nonce,
-    url: FOREIGN_RPC_URL
+    url: FOREIGN_RPC_URL,
+    chainId: Web3Utils.toHex(foreignChainId)
   })
   nonce++
 
@@ -130,7 +136,8 @@ async function deployForeign(homeBridgeAddress) {
     rewardAccounts: [],
     owner: FOREIGN_VALIDATORS_OWNER,
     nonce,
-    url: FOREIGN_RPC_URL
+    url: FOREIGN_RPC_URL,
+    chainId: Web3Utils.toHex(foreignChainId)
   })
   nonce++
 
@@ -139,7 +146,8 @@ async function deployForeign(homeBridgeAddress) {
     proxy: storageValidatorsForeign,
     newOwner: FOREIGN_UPGRADEABLE_ADMIN,
     nonce,
-    url: FOREIGN_RPC_URL
+    url: FOREIGN_RPC_URL,
+    chainId: Web3Utils.toHex(foreignChainId)
   })
   nonce++
 
@@ -147,7 +155,8 @@ async function deployForeign(homeBridgeAddress) {
   const foreignBridgeStorage = await deployContract(EternalStorageProxy, [], {
     from: DEPLOYMENT_ACCOUNT_ADDRESS,
     network: 'foreign',
-    nonce
+    nonce,
+    chainId: Web3Utils.toHex(foreignChainId)
   })
   nonce++
   console.log('[Foreign] ForeignBridge Storage: ', foreignBridgeStorage.options.address)
@@ -156,7 +165,8 @@ async function deployForeign(homeBridgeAddress) {
   const foreignBridgeImplementation = await deployContract(ForeignBridge, [], {
     from: DEPLOYMENT_ACCOUNT_ADDRESS,
     network: 'foreign',
-    nonce
+    nonce,
+    chainId: Web3Utils.toHex(foreignChainId)
   })
   nonce++
   console.log('[Foreign] ForeignBridge Implementation: ', foreignBridgeImplementation.options.address)
@@ -167,7 +177,8 @@ async function deployForeign(homeBridgeAddress) {
     implementationAddress: foreignBridgeImplementation.options.address,
     version: '1',
     nonce,
-    url: FOREIGN_RPC_URL
+    url: FOREIGN_RPC_URL,
+    chainId: Web3Utils.toHex(foreignChainId)
   })
   nonce++
 
@@ -177,7 +188,8 @@ async function deployForeign(homeBridgeAddress) {
     validatorsBridge: storageValidatorsForeign,
     bridge: foreignBridgeImplementation,
     nonce,
-    homeBridgeAddress
+    homeBridgeAddress,
+    chainId: Web3Utils.toHex(foreignChainId)
   })
   nonce++
 
@@ -186,7 +198,8 @@ async function deployForeign(homeBridgeAddress) {
     proxy: foreignBridgeStorage,
     newOwner: FOREIGN_UPGRADEABLE_ADMIN,
     nonce,
-    url: FOREIGN_RPC_URL
+    url: FOREIGN_RPC_URL,
+    chainId: Web3Utils.toHex(foreignChainId)
   })
 
   console.log('\nForeign Deployment Bridge completed\n')
