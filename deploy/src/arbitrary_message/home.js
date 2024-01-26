@@ -39,9 +39,7 @@ async function initializeBridge({ validatorsBridge, bridge, initialNonce }) {
   const foreignChainId = await web3Foreign.eth.getChainId()
 
   console.log('\ninitializing Home Bridge with following parameters:\n')
-  console.log(`SOURCE_CHAIN_ID: ${homeChainId}, DESTINATION_CHAIN_ID: ${foreignChainId}, Home Validators: ${
-    validatorsBridge.options.address
-  },
+  console.log(`SOURCE_CHAIN_ID: ${homeChainId}, DESTINATION_CHAIN_ID: ${foreignChainId}, Home Validators: ${validatorsBridge.options.address},
   HOME_MAX_AMOUNT_PER_TX (gas limit per call): ${HOME_MAX_AMOUNT_PER_TX},
   HOME_GAS_PRICE: ${HOME_GAS_PRICE}, HOME_REQUIRED_BLOCK_CONFIRMATIONS : ${HOME_REQUIRED_BLOCK_CONFIRMATIONS}
   `)
@@ -61,8 +59,7 @@ async function initializeBridge({ validatorsBridge, bridge, initialNonce }) {
     nonce,
     to: bridge.options.address,
     privateKey: deploymentPrivateKey,
-    url: HOME_RPC_URL,
-    chainId: Web3Utils.toHex(homeChainId)
+    url: HOME_RPC_URL
   })
   if (txInitializeHomeBridge.status) {
     assert.strictEqual(Web3Utils.hexToNumber(txInitializeHomeBridge.status), 1, 'Transaction Failed')
@@ -80,16 +77,11 @@ async function deployHome() {
   console.log('========================================\n')
 
   let nonce = await web3Home.eth.getTransactionCount(DEPLOYMENT_ACCOUNT_ADDRESS)
-  // const homeChainId = await web3Home.eth.getChainId()
-  const homeChainId = 10200
-  // console.log('deploying storage for home validators', homeChainId)
-  console.log('Home chainID ', homeChainId)
 
+  console.log('deploying storage for home validators')
   const storageValidatorsHome = await deployContract(EternalStorageProxy, [], {
     from: DEPLOYMENT_ACCOUNT_ADDRESS,
-    network: 'home',
-    nonce,
-    chainId: Web3Utils.toHex(homeChainId) // prevent error eplay-protected (EIP-155) transactions allowed over RPC from Geth (refer to https://blog.ethereum.org/2021/03/03/geth-v1-10-0)
+    nonce
   })
   console.log('[Home] BridgeValidators Storage: ', storageValidatorsHome.options.address)
   nonce++
@@ -97,9 +89,7 @@ async function deployHome() {
   console.log('\ndeploying implementation for home validators')
   const bridgeValidatorsHome = await deployContract(BridgeValidators, [], {
     from: DEPLOYMENT_ACCOUNT_ADDRESS,
-    network: 'home',
-    nonce,
-    chainId: Web3Utils.toHex(homeChainId)
+    nonce
   })
   console.log('[Home] BridgeValidators Implementation: ', bridgeValidatorsHome.options.address)
   nonce++
@@ -110,8 +100,7 @@ async function deployHome() {
     implementationAddress: bridgeValidatorsHome.options.address,
     version: '1',
     nonce,
-    url: HOME_RPC_URL,
-    chainId: Web3Utils.toHex(homeChainId)
+    url: HOME_RPC_URL
   })
   nonce++
 
@@ -125,8 +114,7 @@ async function deployHome() {
     rewardAccounts: [],
     owner: HOME_VALIDATORS_OWNER,
     nonce,
-    url: HOME_RPC_URL,
-    chainId: Web3Utils.toHex(homeChainId)
+    url: HOME_RPC_URL
   })
   nonce++
 
@@ -135,17 +123,14 @@ async function deployHome() {
     proxy: storageValidatorsHome,
     newOwner: HOME_UPGRADEABLE_ADMIN,
     nonce,
-    url: HOME_RPC_URL,
-    chainId: Web3Utils.toHex(homeChainId)
+    url: HOME_RPC_URL
   })
   nonce++
 
   console.log('\ndeploying HomeAMBridge storage\n')
   const homeBridgeStorage = await deployContract(EternalStorageProxy, [], {
     from: DEPLOYMENT_ACCOUNT_ADDRESS,
-    network: 'home',
-    nonce,
-    chainId: Web3Utils.toHex(homeChainId)
+    nonce
   })
   nonce++
   console.log('[Home] HomeAMBridge Storage: ', homeBridgeStorage.options.address)
@@ -153,9 +138,7 @@ async function deployHome() {
   console.log('\ndeploying HomeAMBridge implementation\n')
   const homeBridgeImplementation = await deployContract(HomeBridge, [], {
     from: DEPLOYMENT_ACCOUNT_ADDRESS,
-    network: 'home',
-    nonce,
-    chainId: Web3Utils.toHex(homeChainId)
+    nonce
   })
   nonce++
   console.log('[Home] HomeAMBridge Implementation: ', homeBridgeImplementation.options.address)
@@ -166,8 +149,7 @@ async function deployHome() {
     implementationAddress: homeBridgeImplementation.options.address,
     version: '1',
     nonce,
-    url: HOME_RPC_URL,
-    chainId: Web3Utils.toHex(homeChainId)
+    url: HOME_RPC_URL
   })
   nonce++
 
@@ -183,8 +165,7 @@ async function deployHome() {
     proxy: homeBridgeStorage,
     newOwner: HOME_UPGRADEABLE_ADMIN,
     nonce,
-    url: HOME_RPC_URL,
-    chainId: Web3Utils.toHex(homeChainId)
+    url: HOME_RPC_URL
   })
 
   console.log('\nDeployment of Arbitrary Message Bridge at Home completed\n')

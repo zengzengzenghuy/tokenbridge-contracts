@@ -16,7 +16,7 @@ module.exports = {
   networks: {
     development: {
       network_id: '*',
-      // gas: 10000000,
+      gas: 10000000,
       disableConfirmationListener: true
     },
     ganache: {
@@ -41,8 +41,5 @@ module.exports = {
     }
   },
   mocha: mochaOptions,
-  plugins: ['solidity-coverage', 'truffle-plugin-verify'],
-  api_keys: {
-    etherscan: '61UBQV8KI6FKKFM3HVAJB6WXCI2E7Z8DJV'
-  }
+  plugins: ['solidity-coverage']
 }

@@ -16,40 +16,39 @@ async function deployErcToNative() {
   const deployHome = require('./src/erc_to_native/home')
   const deployForeign = require('./src/erc_to_native/foreign')
   await preDeploy()
-  // const { homeBridge } = await deployHome()
-  //const { foreignBridge } = await deployForeign(homeBridge.address)
-  const { foreignBridge } = await deployForeign('0xccA0Dc2A058884e62082312F09541cC7566406f0')
+  const { homeBridge } = await deployHome()
+  const { foreignBridge } = await deployForeign(homeBridge.address)
   console.log('\nDeployment has been completed.\n\n')
-  // console.log(`[ Home ] HomeBridge: ${homeBridge.address} at block ${homeBridge.deployedBlockNumber}`)
+  console.log(`[ Home ] HomeBridge: ${homeBridge.address} at block ${homeBridge.deployedBlockNumber}`)
   console.log(`[ Foreign ] ForeignBridge: ${foreignBridge.address} at block ${foreignBridge.deployedBlockNumber}`)
-  // writeDeploymentResults({
-  //   homeBridge: {
-  //     ...homeBridge
-  //   },
-  //   foreignBridge: {
-  //     ...foreignBridge
-  //   }
-  // })
+  writeDeploymentResults({
+    homeBridge: {
+      ...homeBridge
+    },
+    foreignBridge: {
+      ...foreignBridge
+    }
+  })
 }
 
 async function deployArbitraryMessage() {
   const preDeploy = require('./src/arbitrary_message/preDeploy')
   const deployHome = require('./src/arbitrary_message/home')
-  // const deployForeign = require('./src/arbitrary_message/foreign')
+  const deployForeign = require('./src/arbitrary_message/foreign')
   await preDeploy()
   const { homeBridge } = await deployHome()
-  // const { foreignBridge } = await deployForeign()
+  const { foreignBridge } = await deployForeign()
   console.log('\nDeployment has been completed.\n\n')
   console.log(`[   Home  ] HomeBridge: ${homeBridge.address} at block ${homeBridge.deployedBlockNumber}`)
-  // console.log(`[ Foreign ] ForeignBridge: ${foreignBridge.address} at block ${foreignBridge.deployedBlockNumber}`)
-  // writeDeploymentResults({
-  //   homeBridge: {
-  //     ...homeBridge
-  //   },
-  //   foreignBridge: {
-  //     ...foreignBridge
-  //   }
-  // })
+  console.log(`[ Foreign ] ForeignBridge: ${foreignBridge.address} at block ${foreignBridge.deployedBlockNumber}`)
+  writeDeploymentResults({
+    homeBridge: {
+      ...homeBridge
+    },
+    foreignBridge: {
+      ...foreignBridge
+    }
+  })
 }
 
 async function deployAMBErcToErc() {
