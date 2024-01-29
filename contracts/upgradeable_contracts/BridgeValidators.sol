@@ -8,15 +8,15 @@ contract BridgeValidators is BaseBridgeValidators {
         address[] _initialValidators,
         address _owner
     ) external onlyRelevantSender returns (bool) {
-        require(!isInitialized());
+        require(!isInitialized(), "has initialized");
         require(_owner != address(0));
         setOwner(_owner);
         require(_requiredSignatures != 0);
-        require(_initialValidators.length >= _requiredSignatures);
+        require(_initialValidators.length >= _requiredSignatures, "validators length must >= requiredSignatures");
 
         for (uint256 i = 0; i < _initialValidators.length; i++) {
             require(_initialValidators[i] != address(0) && _initialValidators[i] != F_ADDR);
-            require(!isValidator(_initialValidators[i]));
+            require(!isValidator(_initialValidators[i]), "validator is already in validaotr list");
 
             if (i == 0) {
                 setNextValidator(F_ADDR, _initialValidators[i]);

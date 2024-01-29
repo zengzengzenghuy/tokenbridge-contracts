@@ -5,10 +5,10 @@ contract FeeTypes {
     bytes32 internal constant FOREIGN_FEE = 0xdeb7f3adca07d6d1f708c1774389db532a2b2f18fd05a62b957e4089f4696ed5; // keccak256(abi.encodePacked("foreign-fee"))
 
     /**
-    * @dev Throws if given fee type is unknown.
-    */
+     * @dev Throws if given fee type is unknown.
+     */
     modifier validFeeType(bytes32 _feeType) {
-        require(_feeType == HOME_FEE || _feeType == FOREIGN_FEE);
+        require(_feeType == HOME_FEE || _feeType == FOREIGN_FEE, "invalid fee type");
         /* solcov ignore next */
         _;
     }

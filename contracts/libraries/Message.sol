@@ -10,6 +10,7 @@ library Message {
         }
         return false;
     }
+
     // layout of message :: bytes:
     // offset  0: 32 bytes :: uint256 - message length
     // offset 32: 20 bytes :: address - recipient address
@@ -26,12 +27,10 @@ library Message {
     // which is padding address to 32 bytes and reading recipient at offset 32.
     // for more details see discussion in:
     // https://github.com/paritytech/parity-bridge/issues/61
-    function parseMessage(bytes message)
-        internal
-        pure
-        returns (address recipient, uint256 amount, bytes32 txHash, address contractAddress)
-    {
-        require(isMessageValid(message));
+    function parseMessage(
+        bytes message
+    ) internal pure returns (address recipient, uint256 amount, bytes32 txHash, address contractAddress) {
+        require(isMessageValid(message), "Message: message is not valid");
         assembly {
             recipient := mload(add(message, 20))
             amount := mload(add(message, 52))
@@ -48,12 +47,12 @@ library Message {
         return 104;
     }
 
-    function recoverAddressFromSignedMessage(bytes signature, bytes message, bool isAMBMessage)
-        internal
-        pure
-        returns (address)
-    {
-        require(signature.length == 65);
+    function recoverAddressFromSignedMessage(
+        bytes signature,
+        bytes message,
+        bool isAMBMessage
+    ) internal pure returns (address) {
+        require(signature.length == 65, "Message: signature length must be 65");
         bytes32 r;
         bytes32 s;
         bytes1 v;
@@ -63,8 +62,11 @@ library Message {
             s := mload(add(signature, 0x40))
             v := mload(add(signature, 0x60))
         }
-        require(uint8(v) == 27 || uint8(v) == 28);
-        require(uint256(s) <= 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0);
+        require(uint8(v) == 27 || uint8(v) == 28, "Message: v must be 27 or 28");
+        require(
+            uint256(s) <= 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0,
+            "Message: s must be <= secp256k1n ÷ 2 + 1 "
+        );
 
         return ecrecover(hashMessage(message, isAMBMessage), uint8(v), r, s);
     }
@@ -80,31 +82,31 @@ library Message {
     }
 
     /**
-    * @dev Validates provided signatures, only first requiredSignatures() number
-    * of signatures are going to be validated, these signatures should be from different validators.
-    * @param _message bytes message used to generate signatures
-    * @param _signatures bytes blob with signatures to be validated.
-    * First byte X is a number of signatures in a blob,
-    * next X bytes are v components of signatures,
-    * next 32 * X bytes are r components of signatures,
-    * next 32 * X bytes are s components of signatures.
-    * @param _validatorContract contract, which conforms to the IBridgeValidators interface,
-    * where info about current validators and required signatures is stored.
-    * @param isAMBMessage true if _message is an AMB message with arbitrary length.
-    */
+     * @dev Validates provided signatures, only first requiredSignatures() number
+     * of signatures are going to be validated, these signatures should be from different validators.
+     * @param _message bytes message used to generate signatures
+     * @param _signatures bytes blob with signatures to be validated.
+     * First byte X is a number of signatures in a blob,
+     * next X bytes are v components of signatures,
+     * next 32 * X bytes are r components of signatures,
+     * next 32 * X bytes are s components of signatures.
+     * @param _validatorContract contract, which conforms to the IBridgeValidators interface,
+     * where info about current validators and required signatures is stored.
+     * @param isAMBMessage true if _message is an AMB message with arbitrary length.
+     */
     function hasEnoughValidSignatures(
         bytes _message,
         bytes _signatures,
         IBridgeValidators _validatorContract,
         bool isAMBMessage
     ) internal view {
-        require(isAMBMessage || isMessageValid(_message));
+        require(isAMBMessage || isMessageValid(_message), "Message: message is not valid");
         uint256 requiredSignatures = _validatorContract.requiredSignatures();
         uint256 amount;
         assembly {
             amount := and(mload(add(_signatures, 1)), 0xff)
         }
-        require(amount >= requiredSignatures);
+        require(amount >= requiredSignatures, "Message: has no enough valid signatures collected");
         bytes32 hash = hashMessage(_message, isAMBMessage);
         address[] memory encounteredAddresses = new address[](requiredSignatures);
 
@@ -121,8 +123,11 @@ library Message {
             }
 
             address recoveredAddress = ecrecover(hash, v, r, s);
-            require(_validatorContract.isValidator(recoveredAddress));
-            require(!addressArrayContains(encounteredAddresses, recoveredAddress));
+            require(_validatorContract.isValidator(recoveredAddress), "Message: signature is not from validator");
+            require(
+                !addressArrayContains(encounteredAddresses, recoveredAddress),
+                "Message: repeat validator signature"
+            );
             encounteredAddresses[i] = recoveredAddress;
         }
     }

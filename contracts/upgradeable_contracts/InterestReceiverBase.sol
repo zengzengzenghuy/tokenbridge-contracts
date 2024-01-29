@@ -31,7 +31,7 @@ contract InterestReceiverBase is IInterestReceiver, Ownable, Claimable {
      * slippage = 1 ether - minReceivedFraction.
      */
     function setMinFractionReceived(uint256 _minFraction) external onlyOwner {
-        require(_minFraction < 1 ether);
+        require(_minFraction < 1 ether, "minFraction must less than 1 ether");
         minReceivedFraction = _minFraction;
     }
 

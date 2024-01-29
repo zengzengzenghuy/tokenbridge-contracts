@@ -9,16 +9,19 @@ contract RewardableValidators is BaseBridgeValidators {
         address[] _initialRewards,
         address _owner
     ) external onlyRelevantSender returns (bool) {
-        require(!isInitialized());
+        require(!isInitialized(), "already initialized");
         _setOwner(_owner);
         require(_requiredSignatures != 0);
         require(_initialValidators.length >= _requiredSignatures);
         require(_initialValidators.length == _initialRewards.length);
 
         for (uint256 i = 0; i < _initialValidators.length; i++) {
-            require(_initialValidators[i] != address(0) && _initialValidators[i] != F_ADDR);
-            require(_initialRewards[i] != address(0));
-            require(!isValidator(_initialValidators[i]));
+            require(
+                _initialValidators[i] != address(0) && _initialValidators[i] != F_ADDR,
+                "initial validator address invalid"
+            );
+            require(_initialRewards[i] != address(0), "initial reward is zero address");
+            require(!isValidator(_initialValidators[i]), "validator is already in validator list");
 
             if (i == 0) {
                 setNextValidator(F_ADDR, _initialValidators[i]);

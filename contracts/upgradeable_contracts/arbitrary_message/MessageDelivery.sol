@@ -14,30 +14,35 @@ contract MessageDelivery is BasicAMB, MessageProcessor {
     uint256 internal constant MIN_GAS_PER_CALL = 100;
 
     /**
-    * @dev Requests message relay to the opposite network
-    * @param _contract executor address on the other side
-    * @param _data calldata passed to the executor on the other side
-    * @param _gas gas limit used on the other network for executing a message
-    */
+     * @dev Requests message relay to the opposite network
+     * @param _contract executor address on the other side
+     * @param _data calldata passed to the executor on the other side
+     * @param _gas gas limit used on the other network for executing a message
+     */
     function requireToPassMessage(address _contract, bytes memory _data, uint256 _gas) public returns (bytes32) {
         return _sendMessage(_contract, _data, _gas, SEND_TO_ORACLE_DRIVEN_LANE);
     }
 
     /**
-    * @dev Initiates sending of an AMB message to the opposite network
-    * @param _contract executor address on the other side
-    * @param _data calldata passed to the executor on the other side
-    * @param _gas gas limit used on the other network for executing a message
-    * @param _dataType AMB message dataType to be included as a part of the header
-    */
-    function _sendMessage(address _contract, bytes memory _data, uint256 _gas, uint256 _dataType)
-        internal
-        returns (bytes32)
-    {
+     * @dev Initiates sending of an AMB message to the opposite network
+     * @param _contract executor address on the other side
+     * @param _data calldata passed to the executor on the other side
+     * @param _gas gas limit used on the other network for executing a message
+     * @param _dataType AMB message dataType to be included as a part of the header
+     */
+    function _sendMessage(
+        address _contract,
+        bytes memory _data,
+        uint256 _gas,
+        uint256 _dataType
+    ) internal returns (bytes32) {
         // it is not allowed to pass messages while other messages are processed
         // if other is not explicitly configured
-        require(messageId() == bytes32(0) || allowReentrantRequests());
-        require(_gas >= MIN_GAS_PER_CALL && _gas <= maxGasPerTx());
+        require(
+            messageId() == bytes32(0) || allowReentrantRequests(),
+            "messageId != bytes32(0) or not allowReentrantRequest"
+        );
+        require(_gas >= MIN_GAS_PER_CALL && _gas <= maxGasPerTx(), "gas must between MIN_GAS_PER_CALL and maxGasPerTx");
 
         uint256 selector;
         assembly {
@@ -67,16 +72,16 @@ contract MessageDelivery is BasicAMB, MessageProcessor {
     }
 
     /**
-    * @dev Packs message header into a single bytes blob
-    * @param _contract executor address on the other side
-    * @param _gas gas limit used on the other network for executing a message
-    * @param _dataType AMB message dataType to be included as a part of the header
-    */
-    function _packHeader(address _contract, uint256 _gas, uint256 _dataType)
-        internal
-        view
-        returns (bytes32 _messageId, bytes memory header)
-    {
+     * @dev Packs message header into a single bytes blob
+     * @param _contract executor address on the other side
+     * @param _gas gas limit used on the other network for executing a message
+     * @param _dataType AMB message dataType to be included as a part of the header
+     */
+    function _packHeader(
+        address _contract,
+        uint256 _gas,
+        uint256 _dataType
+    ) internal view returns (bytes32 _messageId, bytes memory header) {
         uint256 srcChainId = sourceChainId();
         uint256 srcChainIdLength = _sourceChainIdLength();
         uint256 dstChainId = destinationChainId();

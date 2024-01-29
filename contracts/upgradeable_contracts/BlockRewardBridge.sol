@@ -5,7 +5,8 @@ import "../upgradeability/EternalStorage.sol";
 import "openzeppelin-solidity/contracts/AddressUtils.sol";
 
 contract BlockRewardBridge is EternalStorage {
-    bytes32 internal constant BLOCK_REWARD_CONTRACT = 0x20ae0b8a761b32f3124efb075f427dd6ca669e88ae7747fec9fd1ad688699f32; // keccak256(abi.encodePacked("blockRewardContract"))
+    bytes32 internal constant BLOCK_REWARD_CONTRACT =
+        0x20ae0b8a761b32f3124efb075f427dd6ca669e88ae7747fec9fd1ad688699f32; // keccak256(abi.encodePacked("blockRewardContract"))
     bytes4 internal constant BLOCK_REWARD_CONTRACT_ID = 0x2ee57f8d; // blockRewardContractId()
     bytes4 internal constant BRIDGES_ALLOWED_LENGTH = 0x10f2ee7c; // bridgesAllowedLength()
 
@@ -14,7 +15,7 @@ contract BlockRewardBridge is EternalStorage {
     }
 
     function _setBlockRewardContract(address _blockReward) internal {
-        require(AddressUtils.isContract(_blockReward));
+        require(AddressUtils.isContract(_blockReward), "blockReward must be a contract");
 
         // Before store the contract we need to make sure that it is the block reward contract in actual fact,
         // call a specific method from the contract that should return a specific value
@@ -25,7 +26,7 @@ contract BlockRewardBridge is EternalStorage {
         } else if (_blockReward.call(BRIDGES_ALLOWED_LENGTH)) {
             isBlockRewardContract = IBlockReward(_blockReward).bridgesAllowedLength() != 0;
         }
-        require(isBlockRewardContract);
+        require(isBlockRewardContract, "is not a blockReward contract");
         addressStorage[BLOCK_REWARD_CONTRACT] = _blockReward;
     }
 }

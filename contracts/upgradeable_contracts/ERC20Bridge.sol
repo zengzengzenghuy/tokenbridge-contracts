@@ -20,7 +20,7 @@ contract ERC20Bridge is BasicForeignBridge {
         require(_receiver != address(0));
         require(_receiver != address(this));
         require(_amount > 0);
-        require(withinLimit(_amount));
+        require(withinLimit(_amount), "exceed limit");
         addTotalSpentPerDay(getCurrentDay(), _amount);
 
         erc20token().transferFrom(msg.sender, address(this), _amount);

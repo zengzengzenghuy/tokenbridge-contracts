@@ -34,7 +34,8 @@ contract Ownable is EternalStorage {
         require(
             !address(this).call(abi.encodeWithSelector(UPGRADEABILITY_OWNER)) || // covers usage without calling through storage proxy
                 msg.sender == IUpgradeabilityOwnerStorage(this).upgradeabilityOwner() || // covers usage through regular proxy calls
-                msg.sender == address(this) // covers calls through upgradeAndCall proxy method
+                msg.sender == address(this), // covers calls through upgradeAndCall proxy method
+            "is not relevant sender"
         );
         /* solcov ignore next */
         _;

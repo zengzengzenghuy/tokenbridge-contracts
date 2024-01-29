@@ -7,10 +7,13 @@ contract BasicAMB is BasicBridge, VersionableAMB {
     bytes32 internal constant MAX_GAS_PER_TX = 0x2670ecc91ec356e32067fd27b36614132d727b84a1e03e08f412a4f2cf075974; // keccak256(abi.encodePacked("maxGasPerTx"))
     bytes32 internal constant NONCE = 0x7ab1577440dd7bedf920cb6de2f9fc6bf7ba98c78c85a3fa1f8311aac95e1759; // keccak256(abi.encodePacked("nonce"))
     bytes32 internal constant SOURCE_CHAIN_ID = 0x67d6f42a1ed69c62022f2d160ddc6f2f0acd37ad1db0c24f4702d7d3343a4add; // keccak256(abi.encodePacked("sourceChainId"))
-    bytes32 internal constant SOURCE_CHAIN_ID_LENGTH = 0xe504ae1fd6471eea80f18b8532a61a9bb91fba4f5b837f80a1cfb6752350af44; // keccak256(abi.encodePacked("sourceChainIdLength"))
+    bytes32 internal constant SOURCE_CHAIN_ID_LENGTH =
+        0xe504ae1fd6471eea80f18b8532a61a9bb91fba4f5b837f80a1cfb6752350af44; // keccak256(abi.encodePacked("sourceChainIdLength"))
     bytes32 internal constant DESTINATION_CHAIN_ID = 0xbbd454018e72a3f6c02bbd785bacc49e46292744f3f6761276723823aa332320; // keccak256(abi.encodePacked("destinationChainId"))
-    bytes32 internal constant DESTINATION_CHAIN_ID_LENGTH = 0xfb792ae4ad11102b93f26a51b3749c2b3667f8b561566a4806d4989692811594; // keccak256(abi.encodePacked("destinationChainIdLength"))
-    bytes32 internal constant ALLOW_REENTRANT_REQUESTS = 0xffa3a5a0e192028fc343362a39c5688e5a60819a4dc5ab3ee70c25bc25b78dd6; // keccak256(abi.encodePacked("allowReentrantRequests"))
+    bytes32 internal constant DESTINATION_CHAIN_ID_LENGTH =
+        0xfb792ae4ad11102b93f26a51b3749c2b3667f8b561566a4806d4989692811594; // keccak256(abi.encodePacked("destinationChainIdLength"))
+    bytes32 internal constant ALLOW_REENTRANT_REQUESTS =
+        0xffa3a5a0e192028fc343362a39c5688e5a60819a4dc5ab3ee70c25bc25b78dd6; // keccak256(abi.encodePacked("allowReentrantRequests"))
 
     /**
      * Initializes AMB contract
@@ -31,8 +34,8 @@ contract BasicAMB is BasicBridge, VersionableAMB {
         uint256 _requiredBlockConfirmations,
         address _owner
     ) external onlyRelevantSender returns (bool) {
-        require(!isInitialized());
-        require(AddressUtils.isContract(_validatorContract));
+        require(!isInitialized(), "already initialized");
+        require(AddressUtils.isContract(_validatorContract), "validatorContract must be a contractg");
 
         _setChainIds(_sourceChainId, _destinationChainId);
         addressStorage[VALIDATOR_CONTRACT] = _validatorContract;
@@ -132,8 +135,8 @@ contract BasicAMB is BasicBridge, VersionableAMB {
      * @param _destinationChainId chain id for opposite network
      */
     function _setChainIds(uint256 _sourceChainId, uint256 _destinationChainId) internal {
-        require(_sourceChainId > 0 && _destinationChainId > 0);
-        require(_sourceChainId != _destinationChainId);
+        require(_sourceChainId > 0 && _destinationChainId > 0, "chain ID must greater than 0");
+        require(_sourceChainId != _destinationChainId, "same source and destination chainID");
 
         // Length fields are needed further when encoding the message.
         // Chain ids are compressed, so that leading zero bytes are not preserved.

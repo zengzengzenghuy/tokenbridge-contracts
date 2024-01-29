@@ -5,86 +5,86 @@ import "../../libraries/Bytes.sol";
 
 contract MessageProcessor is EternalStorage {
     /**
-    * @dev Returns a status of the message that came from the other side.
-    * @param _messageId id of the message from the other side that triggered a call.
-    * @return true if call executed successfully.
-    */
+     * @dev Returns a status of the message that came from the other side.
+     * @param _messageId id of the message from the other side that triggered a call.
+     * @return true if call executed successfully.
+     */
     function messageCallStatus(bytes32 _messageId) external view returns (bool) {
         return boolStorage[keccak256(abi.encodePacked("messageCallStatus", _messageId))];
     }
 
     /**
-    * @dev Sets a status of the message that came from the other side.
-    * @param _messageId id of the message from the other side that triggered a call.
-    * @param _status execution status, true if executed successfully.
-    */
+     * @dev Sets a status of the message that came from the other side.
+     * @param _messageId id of the message from the other side that triggered a call.
+     * @param _status execution status, true if executed successfully.
+     */
     function setMessageCallStatus(bytes32 _messageId, bool _status) internal {
         boolStorage[keccak256(abi.encodePacked("messageCallStatus", _messageId))] = _status;
     }
 
     /**
-    * @dev Returns a data hash of the failed message that came from the other side.
-    * NOTE: dataHash was used previously to identify outgoing message before AMB message id was introduced.
-    * It is kept for backwards compatibility with old mediators contracts.
-    * @param _messageId id of the message from the other side that triggered a call.
-    * @return keccak256 hash of message data.
-    */
+     * @dev Returns a data hash of the failed message that came from the other side.
+     * NOTE: dataHash was used previously to identify outgoing message before AMB message id was introduced.
+     * It is kept for backwards compatibility with old mediators contracts.
+     * @param _messageId id of the message from the other side that triggered a call.
+     * @return keccak256 hash of message data.
+     */
     function failedMessageDataHash(bytes32 _messageId) external view returns (bytes32) {
         return bytes32(uintStorage[keccak256(abi.encodePacked("failedMessageDataHash", _messageId))]);
     }
 
     /**
-    * @dev Sets a data hash of the failed message that came from the other side.
-    * NOTE: dataHash was used previously to identify outgoing message before AMB message id was introduced.
-    * It is kept for backwards compatibility with old mediators contracts.
-    * @param _messageId id of the message from the other side that triggered a call.
-    * @param data of the processed message.
-    */
+     * @dev Sets a data hash of the failed message that came from the other side.
+     * NOTE: dataHash was used previously to identify outgoing message before AMB message id was introduced.
+     * It is kept for backwards compatibility with old mediators contracts.
+     * @param _messageId id of the message from the other side that triggered a call.
+     * @param data of the processed message.
+     */
     function setFailedMessageDataHash(bytes32 _messageId, bytes data) internal {
         uintStorage[keccak256(abi.encodePacked("failedMessageDataHash", _messageId))] = uint256(keccak256(data));
     }
 
     /**
-    * @dev Returns a receiver address of the failed message that came from the other side.
-    * @param _messageId id of the message from the other side that triggered a call.
-    * @return receiver address.
-    */
+     * @dev Returns a receiver address of the failed message that came from the other side.
+     * @param _messageId id of the message from the other side that triggered a call.
+     * @return receiver address.
+     */
     function failedMessageReceiver(bytes32 _messageId) external view returns (address) {
         return addressStorage[keccak256(abi.encodePacked("failedMessageReceiver", _messageId))];
     }
 
     /**
-    * @dev Sets a sender address of the failed message that came from the other side.
-    * @param _messageId id of the message from the other side that triggered a call.
-    * @param _receiver address of the receiver.
-    */
+     * @dev Sets a sender address of the failed message that came from the other side.
+     * @param _messageId id of the message from the other side that triggered a call.
+     * @param _receiver address of the receiver.
+     */
     function setFailedMessageReceiver(bytes32 _messageId, address _receiver) internal {
         addressStorage[keccak256(abi.encodePacked("failedMessageReceiver", _messageId))] = _receiver;
     }
 
     /**
-    * @dev Returns a sender address of the failed message that came from the other side.
-    * @param _messageId id of the message from the other side that triggered a call.
-    * @return sender address on the other side.
-    */
+     * @dev Returns a sender address of the failed message that came from the other side.
+     * @param _messageId id of the message from the other side that triggered a call.
+     * @return sender address on the other side.
+     */
     function failedMessageSender(bytes32 _messageId) external view returns (address) {
         return addressStorage[keccak256(abi.encodePacked("failedMessageSender", _messageId))];
     }
 
     /**
-    * @dev Sets a sender address of the failed message that came from the other side.
-    * @param _messageId id of the message from the other side that triggered a call.
-    * @param _sender address of the sender on the other side.
-    */
+     * @dev Sets a sender address of the failed message that came from the other side.
+     * @param _messageId id of the message from the other side that triggered a call.
+     * @param _sender address of the sender on the other side.
+     */
     function setFailedMessageSender(bytes32 _messageId, address _sender) internal {
         addressStorage[keccak256(abi.encodePacked("failedMessageSender", _messageId))] = _sender;
     }
 
     /**
-    * @dev Returns an address of the sender on the other side for the currently processed message.
-    * Can be used by executors for getting other side caller address.
-    * @return address of the sender on the other side.
-    */
+     * @dev Returns an address of the sender on the other side for the currently processed message.
+     * Can be used by executors for getting other side caller address.
+     * @return address of the sender on the other side.
+     */
     function messageSender() external view returns (address sender) {
         assembly {
             // Even though this is not the same as addressStorage[keccak256(abi.encodePacked("messageSender"))],
@@ -95,9 +95,9 @@ contract MessageProcessor is EternalStorage {
     }
 
     /**
-    * @dev Sets an address of the sender on the other side for the currently processed message.
-    * @param _sender address of the sender on the other side.
-    */
+     * @dev Sets an address of the sender on the other side for the currently processed message.
+     * @param _sender address of the sender on the other side.
+     */
     function setMessageSender(address _sender) internal {
         assembly {
             // Even though this is not the same as addressStorage[keccak256(abi.encodePacked("messageSender"))],
@@ -108,9 +108,9 @@ contract MessageProcessor is EternalStorage {
     }
 
     /**
-    * @dev Returns an id of the currently processed message.
-    * @return id of the message that originated on the other side.
-    */
+     * @dev Returns an id of the currently processed message.
+     * @return id of the message that originated on the other side.
+     */
     function messageId() public view returns (bytes32 id) {
         assembly {
             // Even though this is not the same as uintStorage[keccak256(abi.encodePacked("messageId"))],
@@ -121,19 +121,19 @@ contract MessageProcessor is EternalStorage {
     }
 
     /**
-    * @dev Returns an id of the currently processed message.
-    * NOTE: transactionHash was used previously to identify incoming message before AMB message id was introduced.
-    * It is kept for backwards compatibility with old mediators contracts, although it doesn't return txHash anymore.
-    * @return id of the message that originated on the other side.
-    */
+     * @dev Returns an id of the currently processed message.
+     * NOTE: transactionHash was used previously to identify incoming message before AMB message id was introduced.
+     * It is kept for backwards compatibility with old mediators contracts, although it doesn't return txHash anymore.
+     * @return id of the message that originated on the other side.
+     */
     function transactionHash() external view returns (bytes32) {
         return messageId();
     }
 
     /**
-    * @dev Sets a message id of the currently processed message.
-    * @param _messageId id of the message that originated on the other side.
-    */
+     * @dev Sets a message id of the currently processed message.
+     * @param _messageId id of the message that originated on the other side.
+     */
     function setMessageId(bytes32 _messageId) internal {
         assembly {
             // Even though this is not the same as uintStorage[keccak256(abi.encodePacked("messageId"))],
@@ -144,9 +144,9 @@ contract MessageProcessor is EternalStorage {
     }
 
     /**
-    * @dev Returns an originating chain id of the currently processed message.
-    * @return source chain id of the message that originated on the other side.
-    */
+     * @dev Returns an originating chain id of the currently processed message.
+     * @return source chain id of the message that originated on the other side.
+     */
     function messageSourceChainId() external view returns (uint256 id) {
         assembly {
             // Even though this is not the same as uintStorage[keccak256(abi.encodePacked("messageSourceChainId"))],
@@ -157,9 +157,9 @@ contract MessageProcessor is EternalStorage {
     }
 
     /**
-    * @dev Sets an originating chain id of the currently processed message.
-    * @param _sourceChainId source chain id of the message that originated on the other side.
-    */
+     * @dev Sets an originating chain id of the currently processed message.
+     * @param _sourceChainId source chain id of the message that originated on the other side.
+     */
     function setMessageSourceChainId(uint256 _sourceChainId) internal {
         assembly {
             // Even though this is not the same as uintStorage[keccak256(abi.encodePacked("messageSourceChainId"))],
@@ -170,21 +170,21 @@ contract MessageProcessor is EternalStorage {
     }
 
     /**
-    * @dev Processes received message. Makes a call to the message executor,
-    * sets dataHash, receive, sender variables for failed messages.
-    * @param _sender sender address on the other side.
-    * @param _executor address of an executor.
-    * @param _messageId id of the processed message.
-    * @param _gasLimit gas limit for a call to executor.
-    * @param _sourceChainId source chain id is of the received message.
-    * @param _data calldata for a call to executor.
-    */
+     * @dev Processes received message. Makes a call to the message executor,
+     * sets dataHash, receive, sender variables for failed messages.
+     * @param _sender sender address on the other side.
+     * @param _executor address of an executor.
+     * @param _messageId id of the processed message.
+     * @param _gasLimit gas limit for a call to executor.
+     * @param _sourceChainId source chain id is of the received message.
+     * @param _data calldata for a call to executor.
+     */
     function processMessage(
         address _sender,
         address _executor,
         bytes32 _messageId,
         uint256 _gasLimit,
-        uint8, /* dataType */
+        uint8 /* dataType */,
         uint256 _sourceChainId,
         bytes memory _data
     ) internal {
@@ -200,14 +200,14 @@ contract MessageProcessor is EternalStorage {
     }
 
     /**
-    * @dev Makes a call to the message executor.
-    * @param _sender sender address on the other side.
-    * @param _contract address of an executor contract.
-    * @param _data calldata for a call to executor.
-    * @param _gas gas limit for a call to executor. 2^32 - 1, if caller will pass all available gas for the execution.
-    * @param _messageId id of the processed message.
-    * @param _sourceChainId source chain id is of the received message.
-    */
+     * @dev Makes a call to the message executor.
+     * @param _sender sender address on the other side.
+     * @param _contract address of an executor contract.
+     * @param _data calldata for a call to executor.
+     * @param _gas gas limit for a call to executor. 2^32 - 1, if caller will pass all available gas for the execution.
+     * @param _messageId id of the processed message.
+     * @param _sourceChainId source chain id is of the received message.
+     */
     function _passMessage(
         address _sender,
         address _contract,
@@ -230,7 +230,7 @@ contract MessageProcessor is EternalStorage {
         // only because the oracle provides incorrect gas limit for the transaction
         // This check is needed here in order to force contract to pass exactly the requested amount of gas.
         // Avoiding it may lead to the unwanted message failure in some extreme cases.
-        require(_gas == 0xffffffff || (gasleft() * 63) / 64 > _gas);
+        require(_gas == 0xffffffff || (gasleft() * 63) / 64 > _gas, "gas error");
 
         bool status = _contract.call.gas(_gas)(_data);
         _validateExecutionStatus(status);
@@ -241,9 +241,9 @@ contract MessageProcessor is EternalStorage {
     }
 
     /**
-    * @dev Validates message execution status. In simplest case, does nothing.
-    * @param _status message execution status.
-    */
+     * @dev Validates message execution status. In simplest case, does nothing.
+     * @param _status message execution status.
+     */
     function _validateExecutionStatus(bool _status) internal {
         (_status);
     }

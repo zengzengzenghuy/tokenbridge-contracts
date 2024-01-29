@@ -21,11 +21,11 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
         bytes32 hashMsg = keccak256(abi.encodePacked(message));
         bytes32 hashSender = keccak256(abi.encodePacked(msg.sender, hashMsg));
         // Duplicated affirmations
-        require(!affirmationsSigned(hashSender));
+        require(!affirmationsSigned(hashSender), "affirmation has been signed");
         setAffirmationsSigned(hashSender, true);
 
         uint256 signed = numAffirmationsSigned(hashMsg);
-        require(!isAlreadyProcessed(signed));
+        require(!isAlreadyProcessed(signed), "affirmation has been processed");
         // the check above assumes that the case when the value could be overflew will not happen in the addition operation below
         signed = signed + 1;
 
@@ -40,11 +40,11 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
     }
 
     /**
-    * @dev Requests message relay to the opposite network, message is sent to the manual lane.
-    * @param _contract executor address on the other side.
-    * @param _data calldata passed to the executor on the other side.
-    * @param _gas gas limit used on the other network for executing a message.
-    */
+     * @dev Requests message relay to the opposite network, message is sent to the manual lane.
+     * @param _contract executor address on the other side.
+     * @param _data calldata passed to the executor on the other side.
+     * @param _gas gas limit used on the other network for executing a message.
+     */
     function requireToConfirmMessage(address _contract, bytes memory _data, uint256 _gas) public returns (bytes32) {
         return _sendMessage(_contract, _data, _gas, SEND_TO_MANUAL_LANE);
     }
@@ -64,25 +64,28 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
 
         (messageId, sender, executor, gasLimit, dataType, chainIds, data) = ArbitraryMessage.unpackData(_message);
 
-        require(_isMessageVersionValid(messageId));
-        require(_isDestinationChainIdValid(chainIds[1]));
+        require(_isMessageVersionValid(messageId), "invalid message version");
+        require(_isDestinationChainIdValid(chainIds[1]), "invalid destination chain id");
         processMessage(sender, executor, messageId, gasLimit, dataType, chainIds[0], data);
     }
 
     function submitSignature(bytes signature, bytes message) external onlyValidator {
         // ensure that `signature` is really `message` signed by `msg.sender`
-        require(msg.sender == Message.recoverAddressFromSignedMessage(signature, message, true));
+        require(
+            msg.sender == Message.recoverAddressFromSignedMessage(signature, message, true),
+            "message is not signed by msg.sender"
+        );
         bytes32 hashMsg = keccak256(abi.encodePacked(message));
         bytes32 hashSender = keccak256(abi.encodePacked(msg.sender, hashMsg));
 
         uint256 signed = numMessagesSigned(hashMsg);
-        require(!isAlreadyProcessed(signed));
+        require(!isAlreadyProcessed(signed), "message has already been processed");
         // the check above assumes that the case when the value could be overflew
         // will not happen in the addition operation below
         signed = signed + 1;
         if (signed > 1) {
             // Duplicated signatures
-            require(!messagesSigned(hashSender));
+            require(!messagesSigned(hashSender), "duplicate signed message");
         } else {
             setMessages(hashMsg, message);
         }
@@ -103,7 +106,7 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
     }
 
     function isAlreadyProcessed(uint256 _number) public pure returns (bool) {
-        return _number & (2**255) == 2**255;
+        return _number & (2 ** 255) == 2 ** 255;
     }
 
     function numMessagesSigned(bytes32 _message) public view returns (uint256) {
@@ -152,7 +155,7 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
     }
 
     function markAsProcessed(uint256 _v) internal pure returns (uint256) {
-        return _v | (2**255);
+        return _v | (2 ** 255);
     }
 
     function setAffirmationsSigned(bytes32 _hash, bool _status) internal {

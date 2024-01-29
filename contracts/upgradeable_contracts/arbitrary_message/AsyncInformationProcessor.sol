@@ -27,11 +27,11 @@ contract AsyncInformationProcessor is BasicHomeAMB {
     function requireToGetInformation(bytes32 _requestSelector, bytes _data) external returns (bytes32) {
         // it is not allowed to pass messages while other messages are processed
         // if other is not explicitly configured
-        require(messageId() == bytes32(0) || allowReentrantRequests());
+        require(messageId() == bytes32(0) || allowReentrantRequests(), "messageId !=0 or not allowReentrantRequests");
         // only contracts are allowed to call this method, since EOA won't be able to receive a callback.
-        require(AddressUtils.isContract(msg.sender));
+        require(AddressUtils.isContract(msg.sender), "msg.sender must be a contract");
 
-        require(isAsyncRequestSelectorEnabled(_requestSelector));
+        require(isAsyncRequestSelectorEnabled(_requestSelector), "requestSelector is not enabled");
 
         bytes32 _messageId = _getNewMessageId(sourceChainId());
 
@@ -74,11 +74,11 @@ contract AsyncInformationProcessor is BasicHomeAMB {
         bytes32 hashMsg = keccak256(abi.encodePacked(_messageId, _status, _result));
         bytes32 hashSender = keccak256(abi.encodePacked(msg.sender, hashMsg));
         // Duplicated confirmations
-        require(!affirmationsSigned(hashSender));
+        require(!affirmationsSigned(hashSender), "duplicated confirmations");
         setAffirmationsSigned(hashSender, true);
 
         uint256 signed = numAffirmationsSigned(hashMsg);
-        require(!isAlreadyProcessed(signed));
+        require(!isAlreadyProcessed(signed), "signature has already been processed");
         // the check above assumes that the case when the value could be overflew will not happen in the addition operation below
         signed = signed + 1;
 
@@ -96,7 +96,7 @@ contract AsyncInformationProcessor is BasicHomeAMB {
                 _result
             );
             uint256 gas = maxGasPerTx();
-            require((gasleft() * 63) / 64 > gas);
+            require((gasleft() * 63) / 64 > gas, "OUT of gas");
 
             bool callbackStatus = sender.call.gas(gas)(data);
 
@@ -122,7 +122,7 @@ contract AsyncInformationProcessor is BasicHomeAMB {
         bytes32 hash = keccak256(abi.encodePacked("asyncSender", _messageId));
         address sender = addressStorage[hash];
 
-        require(sender != address(0));
+        require(sender != address(0), "sender cannot be 0");
 
         delete addressStorage[hash];
         return sender;

@@ -10,7 +10,7 @@ interface IHomeBridge {
 
 contract Helper {
     function unpackSignature(bytes memory _signature) internal pure returns (bytes32, bytes32, uint8) {
-        require(_signature.length == 65);
+        require(_signature.length == 65, "AMBBridgeHelper: signature length must be 65");
         bytes32 r;
         bytes32 s;
         uint8 v;
@@ -42,7 +42,7 @@ contract AMBBridgeHelper is Helper {
         // recover number of confirmations sent by oracles
         signed = signed & 0x8fffffffffffffffffffffffffffffffffffffffffff;
 
-        require(signed < 0x100);
+        require(signed < 0x100, "AMBBridgeHelper: signed must be less  than 0x100");
 
         bytes memory signatures = new bytes(1 + signed * 65);
 

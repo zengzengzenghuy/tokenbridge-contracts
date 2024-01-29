@@ -16,9 +16,9 @@ contract XDaiForeignBridge is ForeignBridgeErcToNative, CompoundConnector, GSNFo
         int256 _decimalShift,
         address _bridgeOnOtherSide
     ) external onlyRelevantSender returns (bool) {
-        require(!isInitialized());
-        require(AddressUtils.isContract(_validatorContract));
-        require(_erc20token == address(daiToken()));
+        require(!isInitialized(), "already initialized");
+        require(AddressUtils.isContract(_validatorContract), "validatorContract must be a contract");
+        require(_erc20token == address(daiToken()), "erc20 token must be DAI token");
         require(_decimalShift == 0);
 
         addressStorage[VALIDATOR_CONTRACT] = _validatorContract;
@@ -39,7 +39,7 @@ contract XDaiForeignBridge is ForeignBridgeErcToNative, CompoundConnector, GSNFo
     }
 
     function upgradeTo530(address _interestReceiver) external {
-        require(msg.sender == address(this));
+        require(msg.sender == address(this), "msg.sender must be this address");
 
         address dai = address(daiToken());
         address comp = address(compToken());
@@ -66,17 +66,13 @@ contract XDaiForeignBridge is ForeignBridgeErcToNative, CompoundConnector, GSNFo
     function claimTokens(address _token, address _to) external onlyIfUpgradeabilityOwner {
         // Since bridged tokens are locked at this contract, it is not allowed to claim them with the use of claimTokens function
         address bridgedToken = address(daiToken());
-        require(_token != address(bridgedToken));
+        require(_token != address(bridgedToken), "token must not be bridgedToken");
         require(_token != address(cDaiToken()) || !isInterestEnabled(bridgedToken));
         require(_token != address(compToken()) || !isInterestEnabled(bridgedToken));
         claimValues(_token, _to);
     }
 
-    function onExecuteMessage(
-        address _recipient,
-        uint256 _amount,
-        bytes32 /*_txHash*/
-    ) internal returns (bool) {
+    function onExecuteMessage(address _recipient, uint256 _amount, bytes32 /*_txHash*/) internal returns (bool) {
         addTotalExecutedPerDay(getCurrentDay(), _amount);
 
         ERC20 token = daiToken();

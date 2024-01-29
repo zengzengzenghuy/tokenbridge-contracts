@@ -14,26 +14,30 @@ contract HomeOverdrawManagement is BaseOverdrawManagement, RewardableBridge, Upg
     using SafeMath for uint256;
 
     /**
-    * @dev Fixes locked tokens, that were out of execution limits during the call to executeAffirmation.
-    * @param hashMsg reference for bridge operation that was out of execution limits.
-    * @param unlockOnForeign true if fixed tokens should be unlocked to the other side of the bridge.
-    * @param valueToUnlock unlocked amount of tokens, should be less than txAboveLimitsValue.
-    * Should be less than maxPerTx(), if tokens need to be unlocked on the other side.
-    */
-    function fixAssetsAboveLimits(bytes32 hashMsg, bool unlockOnForeign, uint256 valueToUnlock)
-        external
-        onlyIfUpgradeabilityOwner
-    {
+     * @dev Fixes locked tokens, that were out of execution limits during the call to executeAffirmation.
+     * @param hashMsg reference for bridge operation that was out of execution limits.
+     * @param unlockOnForeign true if fixed tokens should be unlocked to the other side of the bridge.
+     * @param valueToUnlock unlocked amount of tokens, should be less than txAboveLimitsValue.
+     * Should be less than maxPerTx(), if tokens need to be unlocked on the other side.
+     */
+    function fixAssetsAboveLimits(
+        bytes32 hashMsg,
+        bool unlockOnForeign,
+        uint256 valueToUnlock
+    ) external onlyIfUpgradeabilityOwner {
         uint256 signed = numAffirmationsSigned(hashMsg);
-        require(!isAlreadyProcessed(signed));
+        require(!isAlreadyProcessed(signed), "messsage has already been processed");
         (address recipient, uint256 value) = txAboveLimits(hashMsg);
-        require(recipient != address(0) && value > 0 && value >= valueToUnlock);
+        require(
+            recipient != address(0) && value > 0 && value >= valueToUnlock,
+            "recipient must not be 0, value must >= valueToUnlock"
+        );
         setOutOfLimitAmount(outOfLimitAmount().sub(valueToUnlock));
         uint256 pendingValue = value.sub(valueToUnlock);
         setTxAboveLimitsValue(pendingValue, hashMsg);
         emit AssetAboveLimitsFixed(hashMsg, valueToUnlock, pendingValue);
         if (unlockOnForeign) {
-            require(valueToUnlock <= maxPerTx());
+            require(valueToUnlock <= maxPerTx(), "valueToUnlock must less than maxPerTx");
             address feeManager = feeManagerContract();
             uint256 eventValue = valueToUnlock;
             if (feeManager != address(0)) {
@@ -56,7 +60,7 @@ contract HomeOverdrawManagement is BaseOverdrawManagement, RewardableBridge, Upg
         // check if transfer was marked as out of limits
         if (aboveLimitsRecipient != address(0)) {
             // revert if a given transaction hash was already processed by the call to fixAssetsAboveLimits
-            require(aboveLimitsValue == _value);
+            require(aboveLimitsValue == _value, "value is not equal to aboveLimitsValue");
             setTxAboveLimits(address(0), 0, _hashMsg);
             setOutOfLimitAmount(outOfLimitAmount().sub(_value));
         }

@@ -6,20 +6,20 @@ pragma solidity 0.4.24;
  */
 contract Proxy {
     /**
-    * @dev Tells the address of the implementation where every call will be delegated.
-    * @return address of the implementation to which it will be delegated
-    */
+     * @dev Tells the address of the implementation where every call will be delegated.
+     * @return address of the implementation to which it will be delegated
+     */
     /* solcov ignore next */
     function implementation() public view returns (address);
 
     /**
-    * @dev Fallback function allowing to perform a delegatecall to the given implementation.
-    * This function will return whatever the implementation call returns
-    */
+     * @dev Fallback function allowing to perform a delegatecall to the given implementation.
+     * This function will return whatever the implementation call returns
+     */
     function() public payable {
         // solhint-disable-previous-line no-complex-fallback
         address _impl = implementation();
-        require(_impl != address(0));
+        require(_impl != address(0), "implementation must not be zero address");
         assembly {
             /*
                 0x40 is the "free memory slot", meaning a pointer to next slot of empty memory. mload(0x40)
@@ -85,12 +85,12 @@ contract Proxy {
                 copied to `ptr` from the delegatecall return data
             */
             switch result
-                case 0 {
-                    revert(ptr, returndatasize)
-                }
-                default {
-                    return(ptr, returndatasize)
-                }
+            case 0 {
+                revert(ptr, returndatasize)
+            }
+            default {
+                return(ptr, returndatasize)
+            }
         }
     }
 }

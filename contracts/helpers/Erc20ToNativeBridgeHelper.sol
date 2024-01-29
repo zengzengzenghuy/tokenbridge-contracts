@@ -2,14 +2,17 @@ pragma solidity 0.4.24;
 
 interface IHomeErc20ToNativeBridge {
     function numMessagesSigned(bytes32 _message) external view returns (uint256);
+
     function isAlreadyProcessed(uint256 _number) external pure returns (bool);
+
     function message(bytes32 _hash) external view returns (bytes memory);
+
     function signature(bytes32 _hash, uint256 _index) external view returns (bytes memory);
 }
 
 contract Helper {
     function unpackSignature(bytes memory _signature) internal pure returns (bytes32 r, bytes32 s, uint8 v) {
-        require(_signature.length == 65);
+        require(_signature.length == 65, "erc20ToNativeBridgeHelper: signature length ");
 
         assembly {
             r := mload(add(_signature, 0x20))
@@ -48,7 +51,7 @@ contract Erc20ToNativeBridgeHelper is Helper {
         // recover number of confirmations sent by oracles
         signed = signed & 0x8fffffffffffffffffffffffffffffffffffffffffff;
 
-        require(signed < 0x100);
+        require(signed < 0x100, "erc20ToNativeBridgeHelper: signed must be less than 0x100");
 
         bytes memory signatures = new bytes(1 + signed * 65);
 

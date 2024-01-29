@@ -15,8 +15,8 @@ contract ForeignBridgeErcToNative is ERC20Bridge, OtherSideBridgeStorage {
         int256 _decimalShift,
         address _bridgeOnOtherSide
     ) external onlyRelevantSender returns (bool) {
-        require(!isInitialized());
-        require(AddressUtils.isContract(_validatorContract));
+        require(!isInitialized(), "already initialized");
+        require(AddressUtils.isContract(_validatorContract), "validator contract must be a contract");
 
         addressStorage[VALIDATOR_CONTRACT] = _validatorContract;
         setErc20token(_erc20token);
@@ -44,15 +44,11 @@ contract ForeignBridgeErcToNative is ERC20Bridge, OtherSideBridgeStorage {
      */
     function claimTokens(address _token, address _to) external onlyIfUpgradeabilityOwner {
         // Since bridged tokens are locked at this contract, it is not allowed to claim them with the use of claimTokens function
-        require(_token != address(erc20token()));
+        require(_token != address(erc20token()), "token is not DAI token");
         claimValues(_token, _to);
     }
 
-    function onExecuteMessage(
-        address _recipient,
-        uint256 _amount,
-        bytes32 /*_txHash*/
-    ) internal returns (bool) {
+    function onExecuteMessage(address _recipient, uint256 _amount, bytes32 /*_txHash*/) internal returns (bool) {
         addTotalExecutedPerDay(getCurrentDay(), _amount);
         return erc20token().transfer(_recipient, _unshiftValue(_amount));
     }
@@ -62,11 +58,11 @@ contract ForeignBridgeErcToNative is ERC20Bridge, OtherSideBridgeStorage {
     }
 
     function relayTokens(address _receiver, uint256 _amount) external {
-        require(_receiver != bridgeContractOnOtherSide());
-        require(_receiver != address(0));
-        require(_receiver != address(this));
-        require(_amount > 0);
-        require(withinLimit(_amount));
+        require(_receiver != bridgeContractOnOtherSide(), "receiver is bridgeContractOnOtherSide");
+        require(_receiver != address(0), "receiver is 0");
+        require(_receiver != address(this), "receiver is this address");
+        require(_amount > 0, "amount must greater than 0");
+        require(withinLimit(_amount), "amount exceed limit");
 
         addTotalSpentPerDay(getCurrentDay(), _amount);
 

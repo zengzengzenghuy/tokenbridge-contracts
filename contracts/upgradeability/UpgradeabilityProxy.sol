@@ -10,26 +10,26 @@ import "./UpgradeabilityStorage.sol";
  */
 contract UpgradeabilityProxy is Proxy, UpgradeabilityStorage {
     /**
-    * @dev This event will be emitted every time the implementation gets upgraded
-    * @param version representing the version name of the upgraded implementation
-    * @param implementation representing the address of the upgraded implementation
-    */
+     * @dev This event will be emitted every time the implementation gets upgraded
+     * @param version representing the version name of the upgraded implementation
+     * @param implementation representing the address of the upgraded implementation
+     */
     event Upgraded(uint256 version, address indexed implementation);
 
     /**
-    * @dev Upgrades the implementation address
-    * @param version representing the version name of the new implementation to be set
-    * @param implementation representing the address of the new implementation to be set
-    */
+     * @dev Upgrades the implementation address
+     * @param version representing the version name of the new implementation to be set
+     * @param implementation representing the address of the new implementation to be set
+     */
     function _upgradeTo(uint256 version, address implementation) internal {
-        require(_implementation != implementation);
+        require(_implementation != implementation, "new implementation must be different!");
 
         // This additional check verifies that provided implementation is at least a contract
-        require(AddressUtils.isContract(implementation));
+        require(AddressUtils.isContract(implementation), "new implementation must be a contract");
 
         // This additional check guarantees that new version will be at least greater than the privios one,
         // so it is impossible to reuse old versions, or use the last version twice
-        require(version > _version);
+        require(version > _version, "new version must be greater");
 
         _version = version;
         _implementation = implementation;

@@ -17,8 +17,8 @@ contract BaseBridgeValidators is InitializableBridge, Ownable {
     event RequiredSignaturesChanged(uint256 requiredSignatures);
 
     function setRequiredSignatures(uint256 _requiredSignatures) external onlyOwner {
-        require(validatorCount() >= _requiredSignatures);
-        require(_requiredSignatures != 0);
+        require(validatorCount() >= _requiredSignatures, "validator count must be greater than required signatures");
+        require(_requiredSignatures != 0, "required signatures must not be 0");
         uintStorage[REQUIRED_SIGNATURES] = _requiredSignatures;
         emit RequiredSignaturesChanged(_requiredSignatures);
     }
@@ -31,43 +31,43 @@ contract BaseBridgeValidators is InitializableBridge, Ownable {
         address[] memory list = new address[](validatorCount());
         uint256 counter = 0;
         address nextValidator = getNextValidator(F_ADDR);
-        require(nextValidator != address(0));
+        require(nextValidator != address(0), "next validator must not be zero address");
 
         while (nextValidator != F_ADDR) {
             list[counter] = nextValidator;
             nextValidator = getNextValidator(nextValidator);
             counter++;
 
-            require(nextValidator != address(0));
+            require(nextValidator != address(0), "next validator must not be zero address");
         }
 
         return list;
     }
 
     function _addValidator(address _validator) internal {
-        require(_validator != address(0) && _validator != F_ADDR);
-        require(!isValidator(_validator));
+        require(_validator != address(0) && _validator != F_ADDR, "validator must not be zero address or F_ADDR");
+        require(!isValidator(_validator), "validator is already in validator list");
 
         address firstValidator = getNextValidator(F_ADDR);
-        require(firstValidator != address(0));
+        require(firstValidator != address(0), "first validator must not be zero address");
         setNextValidator(_validator, firstValidator);
         setNextValidator(F_ADDR, _validator);
         setValidatorCount(validatorCount().add(1));
     }
 
     function _removeValidator(address _validator) internal {
-        require(validatorCount() > requiredSignatures());
-        require(isValidator(_validator));
+        require(validatorCount() > requiredSignatures(), "validator count must be greater than required signatures");
+        require(isValidator(_validator), "validator is not in validator list");
         address validatorsNext = getNextValidator(_validator);
         address index = F_ADDR;
         address next = getNextValidator(index);
-        require(next != address(0));
+        require(next != address(0), "next validator must not be zero address");
 
         while (next != _validator) {
             index = next;
             next = getNextValidator(index);
 
-            require(next != F_ADDR && next != address(0));
+            require(next != F_ADDR && next != address(0), "next validator must not be zero address or F_ADDR");
         }
 
         setNextValidator(index, validatorsNext);
@@ -96,7 +96,7 @@ contract BaseBridgeValidators is InitializableBridge, Ownable {
     }
 
     function setValidatorCount(uint256 _validatorCount) internal {
-        require(_validatorCount <= MAX_VALIDATORS);
+        require(_validatorCount <= MAX_VALIDATORS, "validator Count is more than MAX_VALIDATORS");
         uintStorage[VALIDATOR_COUNT] = _validatorCount;
     }
 
@@ -107,7 +107,7 @@ contract BaseBridgeValidators is InitializableBridge, Ownable {
     function isValidatorDuty(address _validator) external view returns (bool) {
         uint256 counter = 0;
         address next = getNextValidator(F_ADDR);
-        require(next != address(0));
+        require(next != address(0), "next validator must not be zero address");
 
         while (next != F_ADDR) {
             if (next == _validator) {
@@ -117,7 +117,7 @@ contract BaseBridgeValidators is InitializableBridge, Ownable {
             next = getNextValidator(next);
             counter++;
 
-            require(next != address(0));
+            require(next != address(0), "next validator must not be zero address");
         }
 
         return false;

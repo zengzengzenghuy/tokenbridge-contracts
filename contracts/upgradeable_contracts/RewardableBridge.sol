@@ -73,7 +73,10 @@ contract RewardableBridge is Ownable, FeeTypes {
      * @param _feeManager address of the new fee manager contract, or zero address to disable fee collection.
      */
     function setFeeManagerContract(address _feeManager) external onlyOwner {
-        require(_feeManager == address(0) || AddressUtils.isContract(_feeManager));
+        require(
+            _feeManager == address(0) || AddressUtils.isContract(_feeManager),
+            "feeeManager must be contract and not 0"
+        );
         addressStorage[FEE_MANAGER_CONTRACT] = _feeManager;
     }
 
@@ -96,22 +99,23 @@ contract RewardableBridge is Ownable, FeeTypes {
      * @param _feeType type of the fee, should be either HOME_FEE of FOREIGN_FEE.
      * @return calculated fee amount.
      */
-    function calculateFee(uint256 _value, bool _recover, address _impl, bytes32 _feeType)
-        internal
-        view
-        returns (uint256 fee)
-    {
+    function calculateFee(
+        uint256 _value,
+        bool _recover,
+        address _impl,
+        bytes32 _feeType
+    ) internal view returns (uint256 fee) {
         bytes memory callData = abi.encodeWithSelector(CALCULATE_FEE, _value, _recover, _feeType);
         assembly {
             let result := callcode(gas, _impl, 0x0, add(callData, 0x20), mload(callData), 0, 32)
 
             switch and(eq(returndatasize, 32), result)
-                case 1 {
-                    fee := mload(0)
-                }
-                default {
-                    revert(0, 0)
-                }
+            case 1 {
+                fee := mload(0)
+            }
+            default {
+                revert(0, 0)
+            }
         }
     }
 
@@ -123,7 +127,10 @@ contract RewardableBridge is Ownable, FeeTypes {
      */
     function distributeFeeFromSignatures(uint256 _fee, address _feeManager, bytes32 _txHash) internal {
         if (_fee > 0) {
-            require(_feeManager.delegatecall(abi.encodeWithSelector(DISTRIBUTE_FEE_FROM_SIGNATURES, _fee)));
+            require(
+                _feeManager.delegatecall(abi.encodeWithSelector(DISTRIBUTE_FEE_FROM_SIGNATURES, _fee)),
+                "DISTRIBUTE FEE FROM SIGNATURE fail"
+            );
             emit FeeDistributedFromSignatures(_fee, _txHash);
         }
     }
@@ -136,7 +143,10 @@ contract RewardableBridge is Ownable, FeeTypes {
      */
     function distributeFeeFromAffirmation(uint256 _fee, address _feeManager, bytes32 _txHash) internal {
         if (_fee > 0) {
-            require(_feeManager.delegatecall(abi.encodeWithSelector(DISTRIBUTE_FEE_FROM_AFFIRMATION, _fee)));
+            require(
+                _feeManager.delegatecall(abi.encodeWithSelector(DISTRIBUTE_FEE_FROM_AFFIRMATION, _fee)),
+                "DISTRIBUTE_FEE_FROM_AFFIRMATION fail"
+            );
             emit FeeDistributedFromAffirmation(_fee, _txHash);
         }
     }

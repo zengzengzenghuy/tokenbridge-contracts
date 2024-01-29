@@ -37,11 +37,11 @@ contract BasicHomeBridge is EternalStorage, Validatable, BasicBridge, BasicToken
         if (withinExecutionLimit(value)) {
             bytes32 hashSender = keccak256(abi.encodePacked(msg.sender, hashMsg));
             // Duplicated affirmations
-            require(!affirmationsSigned(hashSender));
+            require(!affirmationsSigned(hashSender), "affirmation has been signed by sender");
             setAffirmationsSigned(hashSender, true);
 
             uint256 signed = numAffirmationsSigned(hashMsg);
-            require(!isAlreadyProcessed(signed));
+            require(!isAlreadyProcessed(signed), "affirmation is already processed");
             // the check above assumes that the case when the value could be overflew will not happen in the addition operation below
             signed = signed + 1;
 
@@ -54,7 +54,10 @@ contract BasicHomeBridge is EternalStorage, Validatable, BasicBridge, BasicToken
                 // it will couse funds lock on the home side of the bridge
                 setNumAffirmationsSigned(hashMsg, markAsProcessed(signed));
                 if (value > 0) {
-                    require(onExecuteAffirmation(recipient, value, transactionHash, hashMsg));
+                    require(
+                        onExecuteAffirmation(recipient, value, transactionHash, hashMsg),
+                        "fail to execute affirmation"
+                    );
                 }
                 emit AffirmationCompleted(recipient, value, transactionHash);
             }
@@ -65,18 +68,21 @@ contract BasicHomeBridge is EternalStorage, Validatable, BasicBridge, BasicToken
 
     function submitSignature(bytes signature, bytes message) external onlyValidator {
         // ensure that `signature` is really `message` signed by `msg.sender`
-        require(Message.isMessageValid(message));
-        require(msg.sender == Message.recoverAddressFromSignedMessage(signature, message, false));
+        require(Message.isMessageValid(message), "Message is not valid");
+        require(
+            msg.sender == Message.recoverAddressFromSignedMessage(signature, message, false),
+            "msg.sender is not the signer of signed message"
+        );
         bytes32 hashMsg = keccak256(abi.encodePacked(message));
         bytes32 hashSender = keccak256(abi.encodePacked(msg.sender, hashMsg));
 
         uint256 signed = numMessagesSigned(hashMsg);
-        require(!isAlreadyProcessed(signed));
+        require(!isAlreadyProcessed(signed), "siganture has already been processed");
         // the check above assumes that the case when the value could be overflew will not happen in the addition operation below
         signed = signed + 1;
         if (signed > 1) {
             // Duplicated signatures
-            require(!messagesSigned(hashSender));
+            require(!messagesSigned(hashSender), "duplicated signatures");
         } else {
             setMessages(hashMsg, message);
         }
@@ -153,11 +159,11 @@ contract BasicHomeBridge is EternalStorage, Validatable, BasicBridge, BasicToken
     }
 
     function markAsProcessed(uint256 _v) internal pure returns (uint256) {
-        return _v | (2**255);
+        return _v | (2 ** 255);
     }
 
     function isAlreadyProcessed(uint256 _number) public pure returns (bool) {
-        return _number & (2**255) == 2**255;
+        return _number & (2 ** 255) == 2 ** 255;
     }
 
     function numMessagesSigned(bytes32 _message) public view returns (uint256) {

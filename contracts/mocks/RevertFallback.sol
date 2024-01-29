@@ -13,7 +13,7 @@ contract RevertFallback {
 
     function sendEth(address _receiver, uint256 _value) public {
         // solhint-disable-next-line check-send-result
-        require(_receiver.send(_value));
+        require(_receiver.send(_value), "send eth error");
     }
 
     function safeSendEth(address _receiver, uint256 _value) public {

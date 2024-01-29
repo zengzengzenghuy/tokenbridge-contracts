@@ -16,7 +16,7 @@ contract InterestConnector is Ownable, ERC20Bridge {
      * @param token address, for which interest should be enabled.
      */
     modifier interestEnabled(address token) {
-        require(isInterestEnabled(token));
+        require(isInterestEnabled(token), "interested for this token is not enabled");
         /* solcov ignore next */
         _;
     }
@@ -25,9 +25,9 @@ contract InterestConnector is Ownable, ERC20Bridge {
      * @dev Ensures that caller is an EOA.
      * Functions with such modifier cannot be called from other contract (as well as from GSN-like approaches)
      */
-    modifier onlyEOA {
+    modifier onlyEOA() {
         // solhint-disable-next-line avoid-tx-origin
-        require(msg.sender == tx.origin);
+        require(msg.sender == tx.origin, "msg.sender must be tx.origin");
         /* solcov ignore next */
         _;
     }
@@ -136,7 +136,7 @@ contract InterestConnector is Ownable, ERC20Bridge {
      */
     function payInterest(address _token) external onlyEOA interestEnabled(_token) {
         uint256 interest = interestAmount(_token);
-        require(interest >= minInterestPaid(_token));
+        require(interest >= minInterestPaid(_token), "interest is less than minInterestPaid");
 
         uint256 redeemed = _safeWithdrawTokens(_token, interest);
         _transferInterest(_token, redeemed);
@@ -160,7 +160,7 @@ contract InterestConnector is Ownable, ERC20Bridge {
         uint256 balance = _selfBalance(_token);
         uint256 minCash = minCashThreshold(_token);
 
-        require(balance > minCash);
+        require(balance > minCash, "balance is less than minCash");
         uint256 amount = balance - minCash;
 
         _setInvestedAmount(_token, investedAmount(_token).add(amount));
@@ -235,7 +235,7 @@ contract InterestConnector is Ownable, ERC20Bridge {
 
         uint256 redeemed = _selfBalance(_token) - balance;
 
-        require(redeemed >= _amount);
+        require(redeemed >= _amount, "redeemed is less than amount");
 
         return redeemed;
     }
@@ -264,7 +264,7 @@ contract InterestConnector is Ownable, ERC20Bridge {
      * @param _receiver address of the interest receiver.
      */
     function _setInterestReceiver(address _token, address _receiver) internal {
-        require(_receiver != address(this));
+        require(_receiver != address(this), "receiver must not be this address");
         addressStorage[keccak256(abi.encodePacked("interestReceiver", _token))] = _receiver;
     }
 

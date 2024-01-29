@@ -15,10 +15,10 @@ contract BasicForeignBridge is EternalStorage, Validatable, BasicBridge, BasicTo
     event UserRequestForAffirmation(address recipient, uint256 value);
 
     /**
-    * @dev Validates provided signatures and relays a given message
-    * @param message bytes to be relayed
-    * @param signatures bytes blob with signatures to be validated
-    */
+     * @dev Validates provided signatures and relays a given message
+     * @param message bytes to be relayed
+     * @param signatures bytes blob with signatures to be validated
+     */
     function executeSignatures(bytes message, bytes signatures) external {
         Message.hasEnoughValidSignatures(message, signatures, validatorContract(), false);
 
@@ -28,10 +28,10 @@ contract BasicForeignBridge is EternalStorage, Validatable, BasicBridge, BasicTo
         address contractAddress;
         (recipient, amount, txHash, contractAddress) = Message.parseMessage(message);
         if (withinExecutionLimit(amount)) {
-            require(contractAddress == address(this));
-            require(!relayedMessages(txHash));
+            require(contractAddress == address(this), "contract address must be this address");
+            require(!relayedMessages(txHash), "this message has been relayed");
             setRelayedMessages(txHash, true);
-            require(onExecuteMessage(recipient, amount, txHash));
+            require(onExecuteMessage(recipient, amount, txHash), "failed to execute message");
             emit RelayedMessage(recipient, amount, txHash);
         } else {
             onFailedMessage(recipient, amount, txHash);
@@ -39,11 +39,11 @@ contract BasicForeignBridge is EternalStorage, Validatable, BasicBridge, BasicTo
     }
 
     /**
-    * @dev Internal function for updating fallback gas price value.
-    * @param _gasPrice new value for the gas price, zero gas price is not allowed.
-    */
+     * @dev Internal function for updating fallback gas price value.
+     * @param _gasPrice new value for the gas price, zero gas price is not allowed.
+     */
     function _setGasPrice(uint256 _gasPrice) internal {
-        require(_gasPrice > 0);
+        require(_gasPrice > 0, "gas price must be more than 0");
         super._setGasPrice(_gasPrice);
     }
 
