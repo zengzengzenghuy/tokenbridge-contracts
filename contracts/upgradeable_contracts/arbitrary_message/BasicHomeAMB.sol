@@ -32,11 +32,30 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
         setNumAffirmationsSigned(hashMsg, signed);
 
         emit SignedForAffirmation(msg.sender, hashMsg);
+    }
 
-        if (signed >= requiredSignatures()) {
-            setNumAffirmationsSigned(hashMsg, markAsProcessed(signed));
-            handleMessage(message);
-        }
+    function onMessage(uint256 sourceChainId, uint256, address sender, bytes message) external {
+        require(msg.sender == yaru());
+        require(sourceChainId == hashiSourceChainId());
+        require(sender == sourceAmb());
+
+        bytes32 hashMsg = keccak256(abi.encodePacked(message));
+        uint256 signed = numAffirmationsSigned(hashMsg);
+        require(signed >= requiredSignatures());
+        setNumAffirmationsSigned(hashMsg, markAsProcessed(signed));
+        handleMessage(message);
+    }
+
+    function hashiSourceChainId() public view returns (uint256) {
+        return uintStorage[keccak256(abi.encodePacked("hashiSourceChainId"))];
+    }
+
+    function sourceAmb() public view returns (address) {
+        return addressStorage[keccak256(abi.encodePacked("sourceAmb"))];
+    }
+
+    function yaru() public view returns (address) {
+        return addressStorage[keccak256(abi.encodePacked("yaru"))];
     }
 
     /**
@@ -46,7 +65,8 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
     * @param _gas gas limit used on the other network for executing a message.
     */
     function requireToConfirmMessage(address _contract, bytes memory _data, uint256 _gas) public returns (bytes32) {
-        return _sendMessage(_contract, _data, _gas, SEND_TO_MANUAL_LANE);
+        (bytes32 messageId, ) = _sendMessage(_contract, _data, _gas, SEND_TO_MANUAL_LANE);
+        return messageId;
     }
 
     /**
