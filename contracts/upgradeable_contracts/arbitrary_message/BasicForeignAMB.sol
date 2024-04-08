@@ -107,8 +107,22 @@ contract BasicForeignAMB is BasicAMB, MessageRelay, MessageDelivery {
         require(_isMessageVersionValid(msgId));
         require(_isDestinationChainIdValid(chainIds[1]));
         require(!relayedMessages(msgId));
+        require(canBeExecuted(msgId));
+        _setMessageToExecute(msgId, false);
         setRelayedMessages(msgId, true);
         processMessage(sender, executor, msgId, gasLimit, dataType, chainIds[0], data);
+    }
+
+    function onMessage(uint256 sourceChainId, uint256, address sender, bytes message) external {
+        require(msg.sender == yaru());
+        require(sourceChainId == hashiSourceChainId());
+        require(sender == sourceAmb());
+        (bytes32 msgId, ) = ArbitraryMessage.unpackData(message);
+        _setMessageToExecute(msgId, true);
+    }
+
+    function canBeExecuted(bytes32 msgId) public view returns (bool) {
+        return boolStorage[keccak256(abi.encodePacked("messageToExecute", msgId))];
     }
 
     /**
@@ -117,6 +131,10 @@ contract BasicForeignAMB is BasicAMB, MessageRelay, MessageDelivery {
     */
     function _validateExecutionStatus(bool _status) internal {
         require(_status || msg.sig == this.executeSignatures.selector);
+    }
+
+    function _setMessageToExecute(bytes32 msgId, bool status) internal {
+        boolStorage[keccak256(abi.encodePacked("messageToExecute", msgId))] = status;
     }
 
     /**

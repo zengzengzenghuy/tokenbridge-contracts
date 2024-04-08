@@ -46,18 +46,6 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
         handleMessage(message);
     }
 
-    function hashiSourceChainId() public view returns (uint256) {
-        return uintStorage[keccak256(abi.encodePacked("hashiSourceChainId"))];
-    }
-
-    function sourceAmb() public view returns (address) {
-        return addressStorage[keccak256(abi.encodePacked("sourceAmb"))];
-    }
-
-    function yaru() public view returns (address) {
-        return addressStorage[keccak256(abi.encodePacked("yaru"))];
-    }
-
     /**
     * @dev Requests message relay to the opposite network, message is sent to the manual lane.
     * @param _contract executor address on the other side.

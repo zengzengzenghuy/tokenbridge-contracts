@@ -43,38 +43,6 @@ contract MessageDelivery is BasicAMB, MessageProcessor {
         return messageId;
     }
 
-    function hashiAdapters() public view returns (address[]) {
-        uint256 nAdapters = uintStorage[keccak256(abi.encodePacked("nHashiAdapters"))];
-        address[] memory adapters = new address[](nAdapters);
-        for (uint256 i = 0; i < nAdapters; i++)
-            adapters[i] = addressStorage[keccak256(abi.encodePacked("hashiAdapters", i))];
-        return adapters;
-    }
-
-    function hashiReporters() public view returns (address[]) {
-        uint256 nReporters = uintStorage[keccak256(abi.encodePacked("nHashiReporters"))];
-        address[] memory reporters = new address[](nReporters);
-        for (uint256 i = 0; i < nReporters; i++)
-            reporters[i] = addressStorage[keccak256(abi.encodePacked("hashiReporters", i))];
-        return reporters;
-    }
-
-    function yaho() public view returns (address) {
-        return addressStorage[keccak256(abi.encodePacked("yaho"))];
-    }
-
-    function targetAmb() public view returns (address) {
-        return addressStorage[keccak256(abi.encodePacked("targetAmb"))];
-    }
-
-    function hashiTargetChainId() public view returns (uint256) {
-        return uintStorage[keccak256(abi.encodePacked("hashiTargetChainId"))];
-    }
-
-    function hashiThreshold() public view returns (uint256) {
-        return uintStorage[keccak256(abi.encodePacked("hashiThreshold"))];
-    }
-
     /**
     * @dev Initiates sending of an AMB message to the opposite network
     * @param _contract executor address on the other side
