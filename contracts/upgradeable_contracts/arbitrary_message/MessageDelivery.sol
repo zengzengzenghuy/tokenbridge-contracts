@@ -5,6 +5,7 @@ import "./BasicAMB.sol";
 import "./MessageProcessor.sol";
 import "../../libraries/ArbitraryMessage.sol";
 import "../../libraries/Bytes.sol";
+import "../../interfaces/hashi/IYaho.sol";
 
 contract MessageDelivery is BasicAMB, MessageProcessor {
     using SafeMath for uint256;
@@ -20,7 +21,58 @@ contract MessageDelivery is BasicAMB, MessageProcessor {
     * @param _gas gas limit used on the other network for executing a message
     */
     function requireToPassMessage(address _contract, bytes memory _data, uint256 _gas) public returns (bytes32) {
-        return _sendMessage(_contract, _data, _gas, SEND_TO_ORACLE_DRIVEN_LANE);
+        (bytes32 messageId, bytes memory eventData) = _sendMessage(_contract, _data, _gas, SEND_TO_ORACLE_DRIVEN_LANE);
+
+        address[] memory hReporters = hashiReporters();
+        IReporter[] memory reporters = new IReporter[](hReporters.length);
+        for (uint256 i = 0; i < hReporters.length; i++) reporters[i] = IReporter(hReporters[i]);
+
+        address[] memory hAdapters = hashiAdapters();
+        IAdapter[] memory adapters = new IAdapter[](hAdapters.length);
+        for (uint256 j = 0; j < hAdapters.length; j++) adapters[j] = IAdapter(hAdapters[j]);
+
+        IYaho(yaho()).dispatchMessageToAdapters(
+            hashiTargetChainId(),
+            hashiThreshold(),
+            targetAmb(),
+            eventData,
+            reporters,
+            adapters
+        );
+
+        return messageId;
+    }
+
+    function hashiAdapters() public view returns (address[]) {
+        uint256 nAdapters = uintStorage[keccak256(abi.encodePacked("nHashiAdapters"))];
+        address[] memory adapters = new address[](nAdapters);
+        for (uint256 i = 0; i < nAdapters; i++)
+            adapters[i] = addressStorage[keccak256(abi.encodePacked("hashiAdapters", i))];
+        return adapters;
+    }
+
+    function hashiReporters() public view returns (address[]) {
+        uint256 nReporters = uintStorage[keccak256(abi.encodePacked("nHashiReporters"))];
+        address[] memory reporters = new address[](nReporters);
+        for (uint256 i = 0; i < nReporters; i++)
+            reporters[i] = addressStorage[keccak256(abi.encodePacked("hashiReporters", i))];
+        return reporters;
+    }
+
+    function yaho() public view returns (address) {
+        return addressStorage[keccak256(abi.encodePacked("yaho"))];
+    }
+
+    function targetAmb() public view returns (address) {
+        return addressStorage[keccak256(abi.encodePacked("targetAmb"))];
+    }
+
+    function hashiTargetChainId() public view returns (uint256) {
+        return uintStorage[keccak256(abi.encodePacked("hashiTargetChainId"))];
+    }
+
+    function hashiThreshold() public view returns (uint256) {
+        return uintStorage[keccak256(abi.encodePacked("hashiThreshold"))];
     }
 
     /**
@@ -32,7 +84,7 @@ contract MessageDelivery is BasicAMB, MessageProcessor {
     */
     function _sendMessage(address _contract, bytes memory _data, uint256 _gas, uint256 _dataType)
         internal
-        returns (bytes32)
+        returns (bytes32, bytes)
     {
         // it is not allowed to pass messages while other messages are processed
         // if other is not explicitly configured
@@ -63,7 +115,7 @@ contract MessageDelivery is BasicAMB, MessageProcessor {
         bytes memory eventData = abi.encodePacked(header, _data);
 
         emitEventOnMessageRequest(_messageId, eventData);
-        return _messageId;
+        return (_messageId, eventData);
     }
 
     /**
