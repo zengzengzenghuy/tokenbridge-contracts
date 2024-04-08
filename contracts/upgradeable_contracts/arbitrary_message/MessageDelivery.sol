@@ -21,26 +21,7 @@ contract MessageDelivery is BasicAMB, MessageProcessor {
     * @param _gas gas limit used on the other network for executing a message
     */
     function requireToPassMessage(address _contract, bytes memory _data, uint256 _gas) public returns (bytes32) {
-        (bytes32 messageId, bytes memory eventData) = _sendMessage(_contract, _data, _gas, SEND_TO_ORACLE_DRIVEN_LANE);
-
-        address[] memory hReporters = hashiReporters();
-        IReporter[] memory reporters = new IReporter[](hReporters.length);
-        for (uint256 i = 0; i < hReporters.length; i++) reporters[i] = IReporter(hReporters[i]);
-
-        address[] memory hAdapters = hashiAdapters();
-        IAdapter[] memory adapters = new IAdapter[](hAdapters.length);
-        for (uint256 j = 0; j < hAdapters.length; j++) adapters[j] = IAdapter(hAdapters[j]);
-
-        IYaho(yaho()).dispatchMessageToAdapters(
-            hashiTargetChainId(),
-            hashiThreshold(),
-            targetAmb(),
-            eventData,
-            reporters,
-            adapters
-        );
-
-        return messageId;
+        return _sendMessage(_contract, _data, _gas, SEND_TO_ORACLE_DRIVEN_LANE);
     }
 
     /**
@@ -52,7 +33,7 @@ contract MessageDelivery is BasicAMB, MessageProcessor {
     */
     function _sendMessage(address _contract, bytes memory _data, uint256 _gas, uint256 _dataType)
         internal
-        returns (bytes32, bytes)
+        returns (bytes32)
     {
         // it is not allowed to pass messages while other messages are processed
         // if other is not explicitly configured
@@ -83,7 +64,25 @@ contract MessageDelivery is BasicAMB, MessageProcessor {
         bytes memory eventData = abi.encodePacked(header, _data);
 
         emitEventOnMessageRequest(_messageId, eventData);
-        return (_messageId, eventData);
+
+        address[] memory hReporters = hashiReporters();
+        IReporter[] memory reporters = new IReporter[](hReporters.length);
+        for (uint256 i = 0; i < hReporters.length; i++) reporters[i] = IReporter(hReporters[i]);
+
+        address[] memory hAdapters = hashiAdapters();
+        IAdapter[] memory adapters = new IAdapter[](hAdapters.length);
+        for (uint256 j = 0; j < hAdapters.length; j++) adapters[j] = IAdapter(hAdapters[j]);
+
+        IYaho(yaho()).dispatchMessageToAdapters(
+            hashiTargetChainId(),
+            hashiThreshold(),
+            targetAmb(),
+            eventData,
+            reporters,
+            adapters
+        );
+
+        return _messageId;
     }
 
     /**
