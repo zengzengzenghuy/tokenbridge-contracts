@@ -72,7 +72,7 @@ contract BasicAMB is BasicBridge, VersionableAMB {
             delete addressStorage[keccak256(abi.encodePacked("hashiAdapters", i))];
         uintStorage[keccak256(abi.encodePacked("nHashiAdapters"))] = adapters.length;
         for (uint256 j = 0; j < adapters.length; j++)
-            addressStorage[keccak256(abi.encodePacked("hashiAdapters", i))] = adapters[i];
+            addressStorage[keccak256(abi.encodePacked("hashiAdapters", j))] = adapters[j];
     }
 
     function hashiReporters() public view returns (address[]) {
@@ -89,7 +89,7 @@ contract BasicAMB is BasicBridge, VersionableAMB {
             delete addressStorage[keccak256(abi.encodePacked("hashiReporters", i))];
         uintStorage[keccak256(abi.encodePacked("nHashiReporters"))] = reporters.length;
         for (uint256 j = 0; j < reporters.length; j++)
-            addressStorage[keccak256(abi.encodePacked("hashiReporters", i))] = reporters[i];
+            addressStorage[keccak256(abi.encodePacked("hashiReporters", j))] = reporters[j];
     }
 
     function yaho() public view returns (address) {
