@@ -107,13 +107,14 @@ contract BasicForeignAMB is BasicAMB, MessageRelay, MessageDelivery {
         require(_isMessageVersionValid(msgId));
         require(_isDestinationChainIdValid(chainIds[1]));
         require(!relayedMessages(msgId));
-        require(canBeExecuted(msgId));
+        if (HASHI_IS_ENABLED) require(canBeExecuted(msgId));
         _setMessageToExecute(msgId, false);
         setRelayedMessages(msgId, true);
         processMessage(sender, executor, msgId, gasLimit, dataType, chainIds[0], data);
     }
 
     function onMessage(uint256 chainId, uint256, address sender, bytes message) external returns (bytes) {
+        require(HASHI_IS_ENABLED);
         require(msg.sender == yaru());
         require(chainId == hashiTargetChainId());
         require(sender == targetAmb());

@@ -32,9 +32,15 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
         setNumAffirmationsSigned(hashMsg, signed);
 
         emit SignedForAffirmation(msg.sender, hashMsg);
+
+        if (signed >= requiredSignatures() && !HASHI_IS_ENABLED) {
+            setNumAffirmationsSigned(hashMsg, markAsProcessed(signed));
+            handleMessage(message);
+        }
     }
 
     function onMessage(uint256 chainId, uint256, address sender, bytes message) external returns (bytes) {
+        require(HASHI_IS_ENABLED);
         require(msg.sender == yaru());
         require(chainId == hashiTargetChainId());
         require(sender == targetAmb());

@@ -65,22 +65,24 @@ contract MessageDelivery is BasicAMB, MessageProcessor {
 
         emitEventOnMessageRequest(_messageId, eventData);
 
-        address[] memory hReporters = hashiReporters();
-        IReporter[] memory reporters = new IReporter[](hReporters.length);
-        for (uint256 i = 0; i < hReporters.length; i++) reporters[i] = IReporter(hReporters[i]);
+        if (HASHI_IS_ENABLED) {
+            address[] memory hReporters = hashiReporters();
+            IReporter[] memory reporters = new IReporter[](hReporters.length);
+            for (uint256 i = 0; i < hReporters.length; i++) reporters[i] = IReporter(hReporters[i]);
 
-        address[] memory hAdapters = hashiAdapters();
-        IAdapter[] memory adapters = new IAdapter[](hAdapters.length);
-        for (uint256 j = 0; j < hAdapters.length; j++) adapters[j] = IAdapter(hAdapters[j]);
+            address[] memory hAdapters = hashiAdapters();
+            IAdapter[] memory adapters = new IAdapter[](hAdapters.length);
+            for (uint256 j = 0; j < hAdapters.length; j++) adapters[j] = IAdapter(hAdapters[j]);
 
-        IYaho(yaho()).dispatchMessageToAdapters(
-            hashiTargetChainId(),
-            hashiThreshold(),
-            targetAmb(),
-            eventData,
-            reporters,
-            adapters
-        );
+            IYaho(yaho()).dispatchMessageToAdapters(
+                hashiTargetChainId(),
+                hashiThreshold(),
+                targetAmb(),
+                eventData,
+                reporters,
+                adapters
+            );
+        }
 
         return _messageId;
     }
