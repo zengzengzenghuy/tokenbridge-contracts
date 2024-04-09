@@ -108,14 +108,6 @@ contract BasicAMB is BasicBridge, VersionableAMB {
         addressStorage[keccak256(abi.encodePacked("yaru"))] = yaru_;
     }
 
-    function sourceAmb() public view returns (address) {
-        return addressStorage[keccak256(abi.encodePacked("sourceAmb"))];
-    }
-
-    function setSourceAmb(address sourceAmb_) external onlyOwner {
-        addressStorage[keccak256(abi.encodePacked("sourceAmb"))] = sourceAmb_;
-    }
-
     function targetAmb() public view returns (address) {
         return addressStorage[keccak256(abi.encodePacked("targetAmb"))];
     }

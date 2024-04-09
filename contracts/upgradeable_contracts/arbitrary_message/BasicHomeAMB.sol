@@ -37,7 +37,7 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
     function onMessage(uint256 chainId, uint256, address sender, bytes message) external {
         require(msg.sender == yaru());
         require(chainId == hashiTargetChainId());
-        require(sender == sourceAmb());
+        require(sender == targetAmb());
 
         bytes32 hashMsg = keccak256(abi.encodePacked(message));
         uint256 signed = numAffirmationsSigned(hashMsg);
