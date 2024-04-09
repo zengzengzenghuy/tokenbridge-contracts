@@ -124,14 +124,6 @@ contract BasicAMB is BasicBridge, VersionableAMB {
         addressStorage[keccak256(abi.encodePacked("targetAmb"))] = targetAmb_;
     }
 
-    function hashiSourceChainId() public view returns (uint256) {
-        return uintStorage[keccak256(abi.encodePacked("hashiSourceChainId"))];
-    }
-
-    function setHashiSourceChainId(uint256 sourceChainId_) external onlyOwner {
-        uintStorage[keccak256(abi.encodePacked("hashiSourceChainId"))] = sourceChainId_;
-    }
-
     function hashiTargetChainId() public view returns (uint256) {
         return uintStorage[keccak256(abi.encodePacked("hashiTargetChainId"))];
     }
