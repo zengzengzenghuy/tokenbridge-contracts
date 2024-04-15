@@ -6,6 +6,8 @@ import "./MessageProcessor.sol";
 import "../../libraries/ArbitraryMessage.sol";
 import "../../libraries/Bytes.sol";
 import "../../interfaces/hashi/IYaho.sol";
+import "../../interfaces/hashi/IAdapter.sol";
+import "../../interfaces/hashi/IReporter.sol";
 
 contract MessageDelivery is BasicAMB, MessageProcessor {
     using SafeMath for uint256;
@@ -74,7 +76,7 @@ contract MessageDelivery is BasicAMB, MessageProcessor {
             IAdapter[] memory adapters = new IAdapter[](hAdapters.length);
             for (uint256 j = 0; j < hAdapters.length; j++) adapters[j] = IAdapter(hAdapters[j]);
 
-            IYaho(yaho()).dispatchMessageToAdapters(
+            IYaho(yaho()).dispatchMessage(
                 hashiTargetChainId(),
                 hashiThreshold(),
                 targetAmb(),
