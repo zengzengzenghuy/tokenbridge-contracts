@@ -47,6 +47,9 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
 
         bytes32 hashMsg = keccak256(abi.encodePacked(message));
         uint256 signed = numAffirmationsSigned(hashMsg);
+        // NOTE: preventing double execution if HASHI_IS_ENABLED = true on the foreign chain
+        //  and HASHI_IS_ENABLED = false on the home chain
+        require(!isAlreadyProcessed(signed));
         require(signed >= requiredSignatures());
         setNumAffirmationsSigned(hashMsg, markAsProcessed(signed));
         handleMessage(message);
