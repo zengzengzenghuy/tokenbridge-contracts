@@ -5,9 +5,6 @@ import "./BasicAMB.sol";
 import "./MessageProcessor.sol";
 import "../../libraries/ArbitraryMessage.sol";
 import "../../libraries/Bytes.sol";
-import "../../interfaces/hashi/IYaho.sol";
-import "../../interfaces/hashi/IAdapter.sol";
-import "../../interfaces/hashi/IReporter.sol";
 
 contract MessageDelivery is BasicAMB, MessageProcessor {
     using SafeMath for uint256;
@@ -66,25 +63,7 @@ contract MessageDelivery is BasicAMB, MessageProcessor {
         bytes memory eventData = abi.encodePacked(header, _data);
 
         emitEventOnMessageRequest(_messageId, eventData);
-
-        if (HASHI_IS_ENABLED) {
-            address[] memory hReporters = hashiReporters();
-            IReporter[] memory reporters = new IReporter[](hReporters.length);
-            for (uint256 i = 0; i < hReporters.length; i++) reporters[i] = IReporter(hReporters[i]);
-
-            address[] memory hAdapters = hashiAdapters();
-            IAdapter[] memory adapters = new IAdapter[](hAdapters.length);
-            for (uint256 j = 0; j < hAdapters.length; j++) adapters[j] = IAdapter(hAdapters[j]);
-
-            IYaho(yaho()).dispatchMessage(
-                hashiTargetChainId(),
-                hashiThreshold(),
-                targetAmb(),
-                eventData,
-                reporters,
-                adapters
-            );
-        }
+        _maybeRelayDataWithHashi(eventData);
 
         return _messageId;
     }

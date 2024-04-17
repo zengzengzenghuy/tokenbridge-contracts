@@ -8,6 +8,9 @@ import "./Ownable.sol";
 import "./Claimable.sol";
 import "./VersionableBridge.sol";
 import "./DecimalShiftBridge.sol";
+import "../interfaces/hashi/IYaho.sol";
+import "../interfaces/hashi/IAdapter.sol";
+import "../interfaces/hashi/IReporter.sol";
 
 contract BasicBridge is
     InitializableBridge,
@@ -139,5 +142,26 @@ contract BasicBridge is
     function _setGasPrice(uint256 _gasPrice) internal {
         uintStorage[GAS_PRICE] = _gasPrice;
         emit GasPriceChanged(_gasPrice);
+    }
+
+    function _maybeRelayDataWithHashi(bytes data) internal {
+        if (HASHI_IS_ENABLED) {
+            address[] memory hReporters = hashiReporters();
+            IReporter[] memory reporters = new IReporter[](hReporters.length);
+            for (uint256 i = 0; i < hReporters.length; i++) reporters[i] = IReporter(hReporters[i]);
+
+            address[] memory hAdapters = hashiAdapters();
+            IAdapter[] memory adapters = new IAdapter[](hAdapters.length);
+            for (uint256 j = 0; j < hAdapters.length; j++) adapters[j] = IAdapter(hAdapters[j]);
+
+            IYaho(yaho()).dispatchMessage(
+                hashiTargetChainId(),
+                hashiThreshold(),
+                targetAmb(),
+                data,
+                reporters,
+                adapters
+            );
+        }
     }
 }
