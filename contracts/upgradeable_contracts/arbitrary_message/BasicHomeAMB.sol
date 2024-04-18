@@ -43,7 +43,7 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
         require(HASHI_IS_ENABLED);
         require(msg.sender == yaru());
         require(chainId == hashiTargetChainId());
-        require(sender == targetAmb());
+        require(sender == hashiTargetAddress());
 
         bytes32 hashMsg = keccak256(abi.encodePacked(message));
         uint256 signed = numAffirmationsSigned(hashMsg);
