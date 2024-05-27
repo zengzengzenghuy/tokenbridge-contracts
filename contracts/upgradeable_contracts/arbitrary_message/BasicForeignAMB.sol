@@ -107,8 +107,8 @@ contract BasicForeignAMB is BasicAMB, MessageRelay, MessageDelivery {
         require(_isMessageVersionValid(msgId));
         require(_isDestinationChainIdValid(chainIds[1]));
         require(!relayedMessages(msgId));
-        if (HASHI_IS_ENABLED) require(canBeExecuted(msgId));
-        _setMessageToExecute(msgId, false);
+        // NOTE: If Hashi is optional, a message can be executed even if it hasn't been approved by Hashi
+        if (HASHI_IS_ENABLED && !HASHI_IS_OPTIONAL) require(isApprovedByHashi(msgId));
         setRelayedMessages(msgId, true);
         processMessage(sender, executor, msgId, gasLimit, dataType, chainIds[0], data);
     }
@@ -121,11 +121,7 @@ contract BasicForeignAMB is BasicAMB, MessageRelay, MessageDelivery {
                 sender == hashiManager().hashiTargetAddress()
         );
         (bytes32 msgId, ) = ArbitraryMessage.unpackData(message);
-        _setMessageToExecute(msgId, true);
-    }
-
-    function canBeExecuted(bytes32 msgId) public view returns (bool) {
-        return boolStorage[keccak256(abi.encodePacked("messageToExecute", msgId))];
+        _setHashiApprovalForMessage(msgId, true);
     }
 
     /**
@@ -134,10 +130,6 @@ contract BasicForeignAMB is BasicAMB, MessageRelay, MessageDelivery {
     */
     function _validateExecutionStatus(bool _status) internal {
         require(_status || msg.sig == this.executeSignatures.selector);
-    }
-
-    function _setMessageToExecute(bytes32 msgId, bool status) internal {
-        boolStorage[keccak256(abi.encodePacked("messageToExecute", msgId))] = status;
     }
 
     /**
