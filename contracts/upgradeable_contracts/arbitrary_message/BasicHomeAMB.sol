@@ -34,7 +34,7 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
         emit SignedForAffirmation(msg.sender, hashMsg);
 
         // NOTE: If Hashi is optional, an affirmation can be executed even if it hasn't been approved by Hashi
-        if (HASHI_IS_ENABLED && !HASHI_IS_OPTIONAL) {
+        if (HASHI_IS_ENABLED && HASHI_IS_MANDATORY) {
             (bytes32 msgId, ) = ArbitraryMessage.unpackData(message);
             require(isApprovedByHashi(msgId));
         }
