@@ -107,7 +107,6 @@ contract BasicForeignAMB is BasicAMB, MessageRelay, MessageDelivery {
         require(_isMessageVersionValid(msgId));
         require(_isDestinationChainIdValid(chainIds[1]));
         require(!relayedMessages(msgId));
-        // NOTE: If Hashi is optional, a message can be executed even if it hasn't been approved by Hashi
         if (HASHI_IS_ENABLED && HASHI_IS_MANDATORY) require(isApprovedByHashi(msgId));
         setRelayedMessages(msgId, true);
         processMessage(sender, executor, msgId, gasLimit, dataType, chainIds[0], data);
