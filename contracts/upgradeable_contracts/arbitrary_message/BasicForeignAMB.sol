@@ -116,8 +116,8 @@ contract BasicForeignAMB is BasicAMB, MessageRelay, MessageDelivery {
         require(
             HASHI_IS_ENABLED &&
                 msg.sender == hashiManager().yaru() &&
-                chainId == hashiManager().hashiTargetChainId() &&
-                sender == hashiManager().hashiTargetAddress()
+                chainId == hashiManager().targetChainId() &&
+                sender == hashiManager().targetAddress()
         );
         (bytes32 msgId, ) = ArbitraryMessage.unpackData(message);
         _setHashiApprovalForMessage(msgId, true);
