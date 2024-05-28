@@ -33,7 +33,12 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
 
         emit SignedForAffirmation(msg.sender, hashMsg);
 
-        if (signed >= requiredSignatures() && !HASHI_IS_ENABLED) {
+        if (HASHI_IS_ENABLED && HASHI_IS_MANDATORY) {
+            (bytes32 msgId, ) = ArbitraryMessage.unpackData(message);
+            require(isApprovedByHashi(msgId));
+        }
+
+        if (signed >= requiredSignatures()) {
             setNumAffirmationsSigned(hashMsg, markAsProcessed(signed));
             handleMessage(message);
         }
@@ -46,15 +51,8 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
                 chainId == hashiManager().hashiTargetChainId() &&
                 sender == hashiManager().hashiTargetAddress()
         );
-
-        bytes32 hashMsg = keccak256(abi.encodePacked(message));
-        uint256 signed = numAffirmationsSigned(hashMsg);
-        // NOTE: preventing double execution if HASHI_IS_ENABLED = true on the foreign chain
-        //  and HASHI_IS_ENABLED = false on the home chain
-        require(!isAlreadyProcessed(signed));
-        require(signed >= requiredSignatures());
-        setNumAffirmationsSigned(hashMsg, markAsProcessed(signed));
-        handleMessage(message);
+        (bytes32 msgId, ) = ArbitraryMessage.unpackData(message);
+        _setHashiApprovalForMessage(msgId, true);
     }
 
     /**
