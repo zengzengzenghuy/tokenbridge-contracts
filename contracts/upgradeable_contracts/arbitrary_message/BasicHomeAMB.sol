@@ -1,6 +1,7 @@
 pragma solidity 0.4.24;
 
 import "../../libraries/Message.sol";
+import "../../libraries/ArbitraryMessage.sol";
 import "./BasicAMB.sol";
 import "./MessageDelivery.sol";
 
@@ -41,6 +42,19 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
             setNumAffirmationsSigned(hashMsg, markAsProcessed(signed));
             handleMessage(message);
         }
+    }
+
+    function onMessage(
+        uint256 messageId,
+        uint256 chainId,
+        address sender,
+        uint256 threshold,
+        address[] adapters,
+        bytes data
+    ) external returns (bytes) {
+        _validateHashiMessage(chainId, threshold, sender, adapters);
+        (bytes32 msgId, ) = ArbitraryMessage.unpackData(data);
+        _setHashiApprovalForMessage(msgId, true);
     }
 
     /**

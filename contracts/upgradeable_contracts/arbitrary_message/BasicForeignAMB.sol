@@ -1,6 +1,7 @@
 pragma solidity 0.4.24;
 
 import "../../libraries/Message.sol";
+import "../../libraries/ArbitraryMessage.sol";
 import "./BasicAMB.sol";
 import "./MessageDelivery.sol";
 import "../MessageRelay.sol";
@@ -109,6 +110,19 @@ contract BasicForeignAMB is BasicAMB, MessageRelay, MessageDelivery {
         if (HASHI_IS_ENABLED && HASHI_IS_MANDATORY) require(isApprovedByHashi(msgId));
         setRelayedMessages(msgId, true);
         processMessage(sender, executor, msgId, gasLimit, dataType, chainIds[0], data);
+    }
+
+    function onMessage(
+        uint256 messageId,
+        uint256 chainId,
+        address sender,
+        uint256 threshold,
+        address[] adapters,
+        bytes data
+    ) external returns (bytes) {
+        _validateHashiMessage(chainId, threshold, sender, adapters);
+        (bytes32 msgId, ) = ArbitraryMessage.unpackData(data);
+        _setHashiApprovalForMessage(msgId, true);
     }
 
     /**

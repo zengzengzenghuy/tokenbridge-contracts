@@ -77,19 +77,6 @@ contract BasicBridge is
         emit GasPriceChanged(_gasPrice);
     }
 
-    function onMessage(
-        uint256 messageId,
-        uint256 chainId,
-        address sender,
-        uint256 threshold,
-        address[] adapters,
-        bytes data
-    ) external returns (bytes) {
-        _validateHashiMessage(chainId, threshold, sender, adapters);
-        (bytes32 msgId, ) = ArbitraryMessage.unpackData(data);
-        _setHashiApprovalForMessage(msgId, true);
-    }
-
     function _setHashiApprovalForMessage(bytes32 msgId, bool status) internal {
         boolStorage[keccak256(abi.encodePacked("messagesApprovedByHashi", msgId))] = status;
     }
