@@ -3,6 +3,7 @@ pragma solidity 0.4.24;
 import "./Upgradeable.sol";
 import "./InitializableBridge.sol";
 import "openzeppelin-solidity/contracts/AddressUtils.sol";
+import "../libraries/ArbitraryMessage.sol";
 import "./Validatable.sol";
 import "./Ownable.sol";
 import "./Claimable.sol";
@@ -74,6 +75,19 @@ contract BasicBridge is
     function _setGasPrice(uint256 _gasPrice) internal {
         uintStorage[GAS_PRICE] = _gasPrice;
         emit GasPriceChanged(_gasPrice);
+    }
+
+    function onMessage(
+        uint256 messageId,
+        uint256 chainId,
+        address sender,
+        uint256 threshold,
+        address[] adapters,
+        bytes data
+    ) external returns (bytes) {
+        _validateHashiMessage(chainId, threshold, sender, adapters);
+        (bytes32 msgId, ) = ArbitraryMessage.unpackData(data);
+        _setHashiApprovalForMessage(msgId, true);
     }
 
     function _setHashiApprovalForMessage(bytes32 msgId, bool status) internal {
