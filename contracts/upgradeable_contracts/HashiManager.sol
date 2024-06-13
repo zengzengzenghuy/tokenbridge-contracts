@@ -44,7 +44,7 @@ contract HashiManager is InitializableBridge, Ownable {
     }
 
     function setExpectedAdaptersHash(address[] adapters_) external onlyOwner {
-        uintStorage[EXPECTED_ADAPTERS_HASH] = uint256(keccak256(adapters_));
+        uintStorage[EXPECTED_ADAPTERS_HASH] = uint256(keccak256(abi.encodePacked(adapters_)));
     }
 
     function expectedThreshold() external view returns (uint256) {

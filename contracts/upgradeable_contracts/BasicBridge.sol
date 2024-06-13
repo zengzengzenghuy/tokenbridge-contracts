@@ -116,7 +116,7 @@ contract BasicBridge is
                 chainId == manager.targetChainId() &&
                 sender == manager.targetAddress() &&
                 threshold == manager.expectedThreshold() &&
-                keccak256(adapters) == manager.expectedAdaptersHash()
+                keccak256(abi.encodePacked(adapters)) == manager.expectedAdaptersHash()
         );
     }
 }
