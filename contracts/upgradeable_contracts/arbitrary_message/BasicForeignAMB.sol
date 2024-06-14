@@ -113,7 +113,7 @@ contract BasicForeignAMB is BasicAMB, MessageRelay, MessageDelivery {
     }
 
     function onMessage(
-        uint256 messageId,
+        uint256, /*messageId*/
         uint256 chainId,
         address sender,
         uint256 threshold,
