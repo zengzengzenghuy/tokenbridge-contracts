@@ -34,8 +34,7 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
         emit SignedForAffirmation(msg.sender, hashMsg);
 
         if (HASHI_IS_ENABLED && HASHI_IS_MANDATORY) {
-            (bytes32 msgId, ) = ArbitraryMessage.unpackData(message);
-            require(isApprovedByHashi(msgId));
+            require(isApprovedByHashi(hashMsg));
         }
 
         if (signed >= requiredSignatures()) {
@@ -53,9 +52,9 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
         bytes data
     ) external returns (bytes) {
         _validateHashiMessage(chainId, threshold, sender, adapters);
-        (bytes32 msgId, ) = ArbitraryMessage.unpackData(data);
-        require(!isApprovedByHashi(msgId));
-        _setHashiApprovalForMessage(msgId, true);
+        bytes32 hashMsg = keccak256(abi.encodePacked(data));
+        require(!isApprovedByHashi(hashMsg));
+        _setHashiApprovalForMessage(hashMsg, true);
     }
 
     /**
