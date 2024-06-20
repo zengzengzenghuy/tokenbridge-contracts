@@ -63,7 +63,7 @@ contract MessageDelivery is BasicAMB, MessageProcessor {
         bytes memory eventData = abi.encodePacked(header, _data);
 
         emitEventOnMessageRequest(_messageId, eventData);
-        _maybeRelayDataWithHashi(eventData);
+        _maybeSendDataWithHashi(eventData);
 
         return _messageId;
     }

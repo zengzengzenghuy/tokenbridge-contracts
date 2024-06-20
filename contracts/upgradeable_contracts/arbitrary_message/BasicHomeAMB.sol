@@ -54,6 +54,7 @@ contract BasicHomeAMB is BasicAMB, MessageDelivery {
     ) external returns (bytes) {
         _validateHashiMessage(chainId, threshold, sender, adapters);
         (bytes32 msgId, ) = ArbitraryMessage.unpackData(data);
+        require(!isApprovedByHashi(msgId));
         _setHashiApprovalForMessage(msgId, true);
     }
 
