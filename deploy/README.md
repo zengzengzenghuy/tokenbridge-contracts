@@ -1,14 +1,16 @@
-# How to Deploy POA Bridge Contracts
+# How to Deploy Gnosis Chain Bridge Contracts
 
 In order to deploy bridge contracts you must run `npm install` to install all dependencies. For more information, see the [project README](../README.md).
 
 1. Compile the source contracts.
+
 ```
 cd ..
 npm run compile
 ```
 
 2. Create a `.env` file.
+
 ```
 cd deploy
 cp .env.example .env
@@ -50,7 +52,7 @@ GET_RECEIPT_INTERVAL_IN_MILLISECONDS=3000
 
 # The RPC channel to a Home node able to handle deployment/configuration
 # transactions.
-HOME_RPC_URL=https://core.poa.network
+HOME_RPC_URL=https://rpc.gnosischain.com
 # Address on Home network with permissions to change parameters of the bridge contract.
 # For extra security we recommended using a multi-sig wallet contract address here.
 HOME_BRIDGE_OWNER=0x
@@ -149,7 +151,7 @@ HOME_TRANSACTIONS_FEE=0.001
 FOREIGN_TRANSACTIONS_FEE=0.001
 
 # The api url of an explorer to verify all the deployed contracts in Home network. Supported explorers: Blockscout, etherscan
-#HOME_EXPLORER_URL=https://blockscout.com/poa/core/api
+#HOME_EXPLORER_URL=https://gnosis.blockscout.com/api
 # The api key of the explorer api, if required, used to verify all the deployed contracts in Home network.
 #HOME_EXPLORER_API_KEY=
 # The api url of an explorer to verify all the deployed contracts in Foreign network. Supported explorers: Blockscout, etherscan
@@ -186,7 +188,7 @@ GET_RECEIPT_INTERVAL_IN_MILLISECONDS=3000
 
 # The RPC channel to a Home node able to handle deployment/configuration
 # transactions.
-HOME_RPC_URL=https://poa.infura.io
+HOME_RPC_URL=https://rpc.gnosischain.com
 # Address on Home network with permissions to change parameters of the bridge contract.
 # For extra security we recommended using a multi-sig wallet contract address here.
 HOME_BRIDGE_OWNER=0x
@@ -239,7 +241,7 @@ REQUIRED_NUMBER_OF_VALIDATORS=1
 VALIDATORS=0x 0x 0x
 
 # The api url of an explorer to verify all the deployed contracts in Home network. Supported explorers: Blockscout, etherscan
-#HOME_EXPLORER_URL=https://blockscout.com/poa/core/api
+#HOME_EXPLORER_URL=https://gnosis.blockscout.com/api
 # The api key of the explorer api, if required, used to verify all the deployed contracts in Home network.
 #HOME_EXPLORER_API_KEY=
 # The api url of an explorer to verify all the deployed contracts in Foreign network. Supported explorers: Blockscout, etherscan
@@ -293,7 +295,7 @@ DEPLOY_REWARDABLE_TOKEN=false
 
 # The RPC channel to a Home node able to handle deployment/configuration
 # transactions.
-HOME_RPC_URL=https://core.poa.network
+HOME_RPC_URL=https://rpc.gnosischain.com
 # Address on Home network with permissions to change parameters of the bridge contract.
 # For extra security we recommended using a multi-sig wallet contract address here.
 HOME_BRIDGE_OWNER=0x
@@ -348,7 +350,7 @@ HOME_MEDIATOR_REQUEST_GAS_LIMIT=2000000
 FOREIGN_MEDIATOR_REQUEST_GAS_LIMIT=2000000
 
 # The api url of an explorer to verify all the deployed contracts in Home network. Supported explorers: Blockscout, etherscan
-#HOME_EXPLORER_URL=https://blockscout.com/poa/core/api
+#HOME_EXPLORER_URL=https://gnosis.blockscout.com/api
 # The api key of the explorer api, if required, used to verify all the deployed contracts in Home network.
 #HOME_EXPLORER_API_KEY=
 # The api url of an explorer to verify all the deployed contracts in Foreign network. Supported explorers: Blockscout, etherscan
